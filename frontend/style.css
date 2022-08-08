@@ -6,10 +6,18 @@ th, td {
 	border: 1px solid black;
 }
 
+.oldTask {
+	background-color: gray;
+}
+
 .allPoints {
 	background-color: greenyellow;
 }
 
 .noPoints {
-	background-color: lightcoral;
+	background-color: red;
+}
+
+.somePoints {
+	background-color: orange;
 }

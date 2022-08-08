@@ -37,7 +37,7 @@ const anyReq = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         if (forward.status == 200) {
             const cookie = forward.headers.get("set-cookie");
             if (cookie)
-                res.cookie("token", cookie.split("token=")[1]);
+                res.cookie("token", cookie.split("token=")[1].split(";")[0]);
             const data = yield forward.json();
             res.json(JSON.stringify(data));
         }
