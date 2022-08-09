@@ -1,5 +1,7 @@
 # oliTracker
 Simple "tool" to visualize your progress on tasks from previous Informatics Olympiads, to train yourself
+![image](https://user-images.githubusercontent.com/67731379/183693810-c7c52e30-ca27-4026-aad2-d96926fb9228.png)
+
 # How to contribute
 To setup this repository locally, ensure you have the following installed:
 - NodeJS
