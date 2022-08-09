@@ -37,6 +37,7 @@ async function colorTable() {
 	$(".fullScore").removeClass("fullScore");
 	$(".fail").removeClass("fail");
 
+
 	const username = $("#username").val() as string;
 	const profile = await getProfile(username);
 	const scores = profileScores(profile);
@@ -50,6 +51,8 @@ async function colorTable() {
 					elem.addClass("fullScore");
 				else if (scores[t.name] == 0)
 					elem.addClass("fail");
+				else
+					elem.addClass("somePoints");
 			}
 }
 

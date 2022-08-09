@@ -35,3 +35,13 @@ th, td {
 		crimson 20px
 	);
 }
+
+.somePoints {
+	background: repeating-linear-gradient(
+		135deg,
+		gold,
+		gold 10px,
+		orange 10px,
+		orange 20px
+	);
+}
