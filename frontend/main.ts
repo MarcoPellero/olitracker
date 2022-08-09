@@ -36,6 +36,7 @@ async function colorTable() {
 	// reset classes; resets the cells when user changes
 	$(".fullScore").removeClass("fullScore");
 	$(".fail").removeClass("fail");
+	$(".somePoints div").width("100%");
 	$(".somePoints").removeClass("somePoints");
 	// to prevent me from forgetting to add these i should add a second general class, grab that, and remove all of these
 
