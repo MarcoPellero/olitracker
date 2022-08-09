@@ -1,128 +1,62 @@
-interface oiiTask {
-	contest_year: number,
-	index: number,
-	link: string | null,
-	max_score_possible: number,
-	name: string,
-	title: string,
-}
+import { Task, getAllTasks } from "./util/stats.js";
+import { UserProfile, getProfile, profileScores } from "./util/training.js";
 
 const startYear = 2000;
 const endYear = new Date().getFullYear();
-const tasks: {[key: number] : Array<oiiTask>} = {};
-const url = "http://localhost:8080";
-
-async function getOiiTasks() {
-	const id = "gphdM1jkKB5gEYSdkx8UD";
-	const url = (year: number) => `https://stats.olinfo.it/_next/data/${id}/contest/${year}.json`;
-	
-	const range = Array.from({length: endYear-startYear+1}, (x, i) => i + startYear);
-	for await (const year of range) {
-		try {
-			const res = await fetch(url(year));
-			const data = await res.json();
-			tasks[year] = data.pageProps.contest.tasks;
-		} catch (err) { }
-	}
-}
+let tasks: {[year: number]: Array<Task>}; // { year : [task1, task2, task3...] }
 
 function createTable() {
-	const table = $("#tasks")[0] as HTMLTableElement;
-
-	for (let year = startYear; year <= endYear; year++) {
-		if (!tasks[year]) continue;
-		
-		const row = document.createElement("tr");
-		table.appendChild(row);
-
-		const headCell = document.createElement("th");
-		headCell.textContent = year.toString();
-		row.appendChild(headCell);
-
-		for (const t of tasks[year]) {
-			const cell = document.createElement("td");
-			cell.textContent = t.name;
-			cell.id = `task_${t.name}`;
-			row.appendChild(cell);
-		}
-	}
-
-	if (isLogged()) colorTable();
-}
-
-const isLogged = () => document.cookie.split(";").find(x => x.startsWith("token=")) !== undefined;
-
-async function postMacro(path: string, payload: object) {
-	const res = await fetch(
-		`${url}${path}`,
-		{
-			method: "post",
-			credentials: "include",
-			body: JSON.stringify(payload),
-			headers: {
-				"Content-Type": "application/json"
-			}
-		})
-
-	const data = await res.json();
-	if (typeof data == "string") return JSON.parse(data); // sometimes it returns a string.. like double encoding
-	return data;
-}
-
-async function login() {
-	const username = $("#username").val();
-	const password = $("#password").val();
-	const keep_signed = $("#keep_signed").is(":checked");
-
-	const data = await postMacro("/api/user", {action: "login", username, password, keep_signed});
-	if (data.success) {
-		console.log("login successful");
-		colorTable();
-	}
-	else
-		console.log("login unsuccessful");
-}
-
-async function getTaskScore(name: string) {
-	const data = await postMacro(
-		"/api/task",
-		{
-			action: "list",
-			search: name,
-			first: 0,
-			last: 15
-		});
+	const table = $("#taskGrid");
+	table.empty(); // on being re-called it empties and redraws the table
 	
-	for (const t of data.tasks)
-		if (t.name == name)
-			return t.score;
+	for (let i = startYear; i <= endYear; i++) {
+		if (!tasks[i]) continue;
 
-	return undefined;
+		const row = $($.parseHTML(`<tr id=row_${i}></tr>`));
+		row.append(`<th>${i}</th>`);
+
+		for (const t of tasks[i]) {
+			const cell = $($.parseHTML(`<td id=task_${t.name}></td>`));
+			if (t.link) {
+				cell.append(`<a href=${t.link}>${t.name}</a>`);
+				cell.addClass("available");
+			} else {
+				cell.append(t.name);
+				cell.addClass("unavailable");
+			}
+			
+			row.append(cell[0]);
+		}
+
+		table.append(row[0]);
+	}
 }
 
 async function colorTable() {
-	const getId = (link: string) => link.split("/task/")[1].split("/statement")[0];
+	const username = $("#username").val() as string;
+	const profile = await getProfile(username);
+	const scores = profileScores(profile);
+	
+	for (const year in tasks)
+		for (const t of tasks[year])
+			if (typeof scores[t.name] != "undefined") {
+				const elem = $(`#task_${t.name}`);
 
-	const range = Array.from({length: endYear-startYear+1}, (x, i) => i + startYear);
-	for (const year of range) {
-		if (!tasks[year]) continue;
-
-		for (const t of tasks[year]) {
-			const elem = $(`#task_${t.name}`);
-			if (!t.link) {
-				elem.addClass("oldTask");
-				continue;
+				if (scores[t.name] == 100)
+					elem.addClass("fullScore");
+				else if (scores[t.name] == 0)
+					elem.addClass("fail");
 			}
-			const score = await getTaskScore(getId(t.link));
-			if (score != undefined)
-				elem.addClass(`${score == 100 ? "all" : score == 0 ? "no" : "some"}Points`);
-		}
-	}
 }
 
 async function main() {
-	await getOiiTasks();
+	tasks = await getAllTasks(startYear, endYear);
 	createTable();
+
+	$("#selectUser").on("submit", () => {
+		colorTable();
+		return false;
+	})
 }
 
 main();

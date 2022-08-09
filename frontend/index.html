@@ -1,20 +1,19 @@
 <html>
 
 <head>
-	<link href="style.css" rel="stylesheet">
+	<link rel="stylesheet" href="style.css">
+	
+	<script>let exports = {};</script> <!-- https://stackoverflow.com/questions/43042889/typescript-referenceerror-exports-is-not-defined -->
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-	<script defer src="main.js"></script>
+	<script defer type="module" src="main.js"></script>
 </head>
 
 <body>
-	<input type="text" id="username" placeholder="Username...">
-	<input type="password" id="password" placeholder="Password...">
-	<input type="button" value="Login" onclick="login()">
-
-	<p id="keep_signed-text">Keep me signed in for 30 days</p>
-	<input type="checkbox" id="keep_signed">
-
-	<table id="tasks"></table>
+	<form id="selectUser">
+		<input type="text" id="username" placeholder="User:">
+		<input type="submit" value="Lock in">
+	</form>
+	<table id="taskGrid"></table>
 </body>
 
 </html>
