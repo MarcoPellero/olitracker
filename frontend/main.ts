@@ -33,6 +33,10 @@ function createTable() {
 }
 
 async function colorTable() {
+	// reset classes; resets the cells when user changes
+	$(".fullScore").removeClass("fullScore");
+	$(".fail").removeClass("fail");
+
 	const username = $("#username").val() as string;
 	const profile = await getProfile(username);
 	const scores = profileScores(profile);
