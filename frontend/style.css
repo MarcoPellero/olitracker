@@ -4,9 +4,10 @@ table {
 
 th, td {
 	border: 1px solid black;
+	padding: 0;
 }
 
-.unavailable {
+.unavailable div {
 	background: repeating-linear-gradient(
 		135deg,
 		gray,
@@ -16,7 +17,7 @@ th, td {
 	);
 }
 
-.fullScore {
+.fullScore div {
 	background: repeating-linear-gradient(
 		135deg,
 		lightgreen,
@@ -26,7 +27,7 @@ th, td {
 	);
 }
 
-.fail {
+.fail div {
 	background: repeating-linear-gradient(
 		135deg,
 		lightcoral,
@@ -36,7 +37,7 @@ th, td {
 	);
 }
 
-.somePoints {
+.somePoints div {
 	background: repeating-linear-gradient(
 		135deg,
 		gold,

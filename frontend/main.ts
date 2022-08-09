@@ -16,12 +16,12 @@ function createTable() {
 		row.append(`<th>${i}</th>`);
 
 		for (const t of tasks[i]) {
-			const cell = $($.parseHTML(`<td id=task_${t.name}></td>`));
+			const cell = $($.parseHTML(`<td id=task_${t.name}><div></div></td>`));
 			if (t.link) {
-				cell.append(`<a href=${t.link}>${t.name}</a>`);
 				cell.addClass("available");
+				cell.children().eq(0).append(`<a href=${t.link}>${t.name}</a>`);
 			} else {
-				cell.append(t.name);
+				cell.children().eq(0).append(t.name);
 				cell.addClass("unavailable");
 			}
 			
@@ -52,8 +52,10 @@ async function colorTable() {
 					elem.addClass("fullScore");
 				else if (scores[t.name] == 0)
 					elem.addClass("fail");
-				else
+				else {
+					elem.children("div").eq(0).width(`${scores[t.name]}%`);
 					elem.addClass("somePoints");
+				}
 			}
 }
 
