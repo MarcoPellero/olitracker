@@ -54,7 +54,8 @@ async function colorTable() {
 				else if (scores[t.name] == 0)
 					elem.addClass("fail");
 				else {
-					elem.children("div").eq(0).width(`${scores[t.name]}%`);
+					/*elem.children("div").eq(0).width(`${scores[t.name]}%`);*/
+					elem.children("div").eq(0).css(`background-image`,`linear-gradient(to right,#fab22c ${scores[t.name]}%,rgb(0,0,0,0) 0%) `);
 					elem.addClass("somePoints");
 				}
 			}
