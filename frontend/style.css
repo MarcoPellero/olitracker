@@ -1,10 +1,40 @@
+
 table {
+	margin: auto;
 	border-collapse: collapse;
 }
 
-th, td {
-	border: 1px solid black;
-	padding: 0;
+
+
+td div{
+	line-height: 20px;
+	width: 100px;
+	height: 20px;
+
+	border-radius: 25px;
+  	border: 1px solid black;
+
+	text-align: center;
+	font-size: 15px;
+
+	background-color: white;
+
+	font-family: "Poppins Regular", Arial, Helvetica, sans-serif;
+}
+
+td div:hover{
+	transform: scale(1.1);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.available a{
+	display: block;
+	width: 100px;
+	height: 20px;
+
+	color: black;
+	text-decoration: none;
+
 }
 
 .unavailable div {
@@ -45,4 +75,10 @@ th, td {
 		orange 10px,
 		orange 20px
 	);
+}
+
+@font-face {
+	font-family: "Poppins regular";
+	src: url("assets/Poppins-Regular.ttf")
+	format("truetype");
 }
