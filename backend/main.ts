@@ -18,6 +18,7 @@ const anyReq = async (req: Request, res: Response) => {
 		}
 	};
 
+
 	if (req.body) // some requests, like GET, don't have a body
 		payload.body = JSON.stringify(req.body);
 	
@@ -39,7 +40,7 @@ const anyReq = async (req: Request, res: Response) => {
 	} catch (err) {
 		res.status(500).end();
 		console.log(err);
-	}
+	} 
 };
 
 app.post("/api/*", anyReq);

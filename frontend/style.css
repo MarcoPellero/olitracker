@@ -8,18 +8,25 @@ table {
 
 td div{
 	line-height: 20px;
+	/*
+	pallero's fault
 	width: 100px;
 	height: 20px;
-
+	*/
+	margin:auto;
 	border-radius: 25px;
   	border: 1px solid black;
+
+	padding-left: 2px;
+	padding-right: 2px;
 
 	text-align: center;
 	font-size: 15px;
 
 	background-color: white;
-
+	overflow: auto;
 	font-family: "Poppins Regular", Arial, Helvetica, sans-serif;
+	
 }
 
 td div:hover{
@@ -29,9 +36,13 @@ td div:hover{
 
 .available a{
 	display: block;
+
+
+	/*
+	pallero's fault :(
 	width: 100px;
 	height: 20px;
-
+	*/
 	color: black;
 	text-decoration: none;
 
@@ -68,13 +79,7 @@ td div:hover{
 }
 
 .somePoints div {
-	background: repeating-linear-gradient(
-		135deg,
-		gold,
-		gold 10px,
-		orange 10px,
-		orange 20px
-	);
+	background: repeating-linear-gradient(135deg,gold,gold 10px,orange 10px,orange 20px) ;
 }
 
 @font-face {
