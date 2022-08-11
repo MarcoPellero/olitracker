@@ -31,8 +31,7 @@ const anyReq = async (req: Request, res: Response) => {
 			if (cookie)
 				res.cookie("token", cookie.split("token=")[1].split(";")[0]);
 			
-			const data = await forward.json();
-			res.json(JSON.stringify(data));
+			res.send(await forward.text());
 		} else
 			res.end();
 
