@@ -84,7 +84,7 @@ td div:hover {
 #error {
 	position: absolute;
 
-	visibility: visible;
+	display: none; /* initially hidden; shown by JS */
 	width: 100px;
 	height: 50px;
 	padding-right: 20px;

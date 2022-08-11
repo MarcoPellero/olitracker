@@ -41,8 +41,18 @@ async function colorTable() {
 	// to prevent me from forgetting to add these i should add a second general class, grab that, and remove all of these
 
 	const username = $("#username").val() as string;
-	const profile = await getProfile(username);
-	const scores = profileScores(profile);
+	let scores;
+
+	try {
+		const profile = await getProfile(username);
+		scores = profileScores(profile);
+	} catch (err) {
+		$("#error").show();
+		setTimeout(() => {
+			$("#error").fadeOut(2500);
+		}, 1000);
+		return;
+	}
 	
 	for (const year in tasks)
 		for (const t of tasks[year])

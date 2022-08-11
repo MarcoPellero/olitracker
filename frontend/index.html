@@ -16,7 +16,12 @@
 		<input type="text" id="username" placeholder="User:">
 		<input type="submit" value="Lock in">
 	</form>
-	<p id="error"><label>error: <br></label>username not found</p>
+
+	<div id="error">
+		<p>Error: Username not found</p>
+		<button onclick="$('#error').hide();">X</button>
+	</div>
+
 	<table id="taskGrid"></table>
 </body>
 
