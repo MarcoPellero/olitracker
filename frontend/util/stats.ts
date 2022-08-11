@@ -63,7 +63,6 @@ async function getAllTasks(from: number, to: number) {
 			// task.name is inconsistent between stats.olinfo & training.olinfo
 			// for ease of use i'm normalizing them all to the training.olinfo standard
 			for (const t of tasks[i])
-
 				if (t.link)
 					t.name = t.link.split("/task/")[1].split("/statement")[0];
 
