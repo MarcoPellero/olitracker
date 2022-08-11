@@ -16,27 +16,34 @@ interface UserProfile {
 	}>
 }
 
-async function getProfile(username: string) {
-	const url = "http://localhost:8080/api/user";
-	const payload = {
-		action: "get",
-		username
-	};
+const api = "http://localhost:8080/api/";
 
+async function fetchMacro(path: string, payload: object) {
 	const res = await fetch(
-		url,
+		`${api}${path}`,
 		{
 			method: "post",
 			body: JSON.stringify(payload),
 			headers: {
 				"Content-Type": "application/json"
 			}
-		}
-	);
-	const data = await res.json();
-
+		});
+	
+	let data = await res.json();
 	if (typeof data == "string")
-		return JSON.parse(data);
+		data = JSON.parse(data);
+	
+	return data;
+}
+
+async function getProfile(username: string) {
+	const path = "user";
+	const payload = {
+		action: "get",
+		username
+	};
+
+	const data = await fetchMacro(path, payload);
 
 	if (data.success == 0)
 		throw new Error(`Error while grabbing UserProfile by username: ${username}`);
