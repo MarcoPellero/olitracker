@@ -34,11 +34,12 @@ async function getProfile(username: string) {
 		}
 	);
 	const data = await res.json();
-
+	
+	if (typeof data == "string")
+		return JSON.parse(data);
+	
 	if (data.success == 0)
 		throw new Error(`Error while grabbing UserProfile by username: ${username}`);
-	else if (typeof data == "string")
-		return JSON.parse(data);
 
 	return data;
 }
@@ -55,5 +56,5 @@ function profileScores(user: UserProfile) {
 export {
 	UserProfile,
 	getProfile,
-	profileScores
+	profileScores,
 }
