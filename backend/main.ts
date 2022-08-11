@@ -18,8 +18,7 @@ const anyReq = async (req: Request, res: Response) => {
 		}
 	};
 
-
-	if (req.body) // some requests, like GET, don't have a body
+	if (Object.keys(req.body).length) // some requests, like GET, don't have a body
 		payload.body = JSON.stringify(req.body);
 	
 	try {
