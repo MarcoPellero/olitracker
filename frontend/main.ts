@@ -47,7 +47,9 @@ async function colorTable() {
 		const profile = await getProfile(username);
 		scores = profileScores(profile);
 	} catch (err) {
+		$("#error").stop(false, true); // cancel existing fadeOut (if there is one)
 		$("#error").show();
+
 		setTimeout(() => {
 			$("#error").fadeOut(2500);
 		}, 1000);
