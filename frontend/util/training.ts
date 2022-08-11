@@ -36,7 +36,7 @@ async function fetchMacro(path: string, payload: object) {
 	return data;
 }
 
-async function getProfile(username: string) {
+async function getProfile(username: string): Promise<UserProfile> {
 	const path = "user";
 	const payload = {
 		action: "get",
@@ -51,7 +51,7 @@ async function getProfile(username: string) {
 	return data;
 }
 
-function profileScores(user: UserProfile) {
+function profileScores(user: UserProfile): {[name: string]: number} {
 	const scores: {[name: string]: number} = {};
 
 	for (const t of user.scores)

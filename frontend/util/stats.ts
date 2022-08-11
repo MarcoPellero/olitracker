@@ -49,7 +49,7 @@ interface Contest {
 	__N_SSG: boolean
 }
 
-async function getAllTasks(from: number, to: number) {
+async function getAllTasks(from: number, to: number): Promise<{[year: number]: Array<Task>}> {
 	const id = "gphdM1jkKB5gEYSdkx8UD";
 	const url = (year: number) => `https://stats.olinfo.it/_next/data/${id}/contest/${year}.json`;
 	const tasks: {[year: number]: Array<Task>} = {};
