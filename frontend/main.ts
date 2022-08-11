@@ -1,7 +1,5 @@
 import { Task, getAllTasks } from "./util/stats.js";
-
 import { getProfile, profileScores } from "./util/training.js";
-
 
 const startYear = 2000;
 const endYear = new Date().getFullYear();
