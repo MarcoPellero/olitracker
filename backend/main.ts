@@ -9,7 +9,7 @@ app.use(express.static("../frontend/"));
 app.use(express.json());
 
 const anyReq = async (req: Request, res: Response) => {
-	const url = `${baseUrl}${req.path}`;
+	const url = `${baseUrl}${req.url}`;
 	const payload: RequestInit = {
 		method: req.method,
 		headers: {
