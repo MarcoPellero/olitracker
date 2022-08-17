@@ -54,6 +54,11 @@ app.get("/api/score", async (req, res) => {
 	}
 });
 
+app.get("/api/competitions", (req, res) => {
+	// list all supported competitions (by name)
+	res.json(Object.keys(competitions)).end();
+});
+
 app.listen(port, () => {
 	console.log(`Server listening on port ${port}`);
 });
