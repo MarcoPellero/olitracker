@@ -1,0 +1,16 @@
+table, tr, th, td {
+	border: 1px solid black;
+	border-collapse: collapse;
+}
+
+.fail {
+	background-color: lightcoral;
+}
+
+.success {
+	background-color: greenyellow;
+}
+
+.mixed {
+	background-color: orange;
+}
