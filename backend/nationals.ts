@@ -116,82 +116,63 @@ interface trainingUser {
 	username: string
 }
 
-export async function getTasks(): Promise<misc.Task[][]> {
-	const id = "gphdM1jkKB5gEYSdkx8UD"; // changes whenever the site is updated; can be scraped from the HTML; i should do that for sure...
-	const url = (year: number) => `https://stats.olinfo.it/_next/data/${id}/contest/${year}.json`;
+const normalizeTask = (task: statsYearTask): misc.Task => ({
+	name: task.name,
+	id: task.name,
+	link: task.link,
+	score: null,
+	max_score_possible: task.max_score_possible,
+});
 
-	const output: misc.Task[][] = [];
+async function getTasks(): Promise<misc.Event[]> {
+	const years = misc.range(2000, new Date().getFullYear() + 1);
+	const statsId = "gphdM1jkKB5gEYSdkx8UD"; // need to scrape it from stats's HTML in case it changes
+	const url = (year: number) => `https://stats.olinfo.it/_next/data/${statsId}/contest/${year}.json`;
 
-	const years = misc.range(2000, new Date().getFullYear()+1);
-	await Promise.all(
-		years.map(async y => {
-			const res = await fetch(url(y));
-			if (res.status != 200)
-				return [];
+	const arr = await Promise.all( years.map(y => fetch(url(y))) )
+	const output: misc.Event[] = [];
+	for (const res of arr) {
+		if (!res.ok) continue;
 
-			const data: statsYear = (await res.json()).pageProps;
-			
-			const tasks: misc.Task[] = [];
-			for (const t of data.contest.tasks)
-				tasks.push(
-				{
-					name: t.name,
-					title: t.title,
-					link: t.link,
-					score: null,
-					max_score_possible: t.max_score_possible
-				});
-			
-			return tasks;
-		})
-	).then(vals => {
-		output.push(...( vals.filter(x => x.length > 0) ))
-	});
+		const data: statsYear = (await res.json()).pageProps;
+		output.push({
+			year: data.year,
+			tasks: data.contest.tasks.map(normalizeTask)
+		});
+	}
 
 	return output;
 }
 
-export async function getScores(user: string): Promise<misc.Scores> {
-	const url = "https://training.olinfo.it/api/user";
-	const payload = {
-		action: "get",
-		username: user
-	}
+async function addScores(username: string, tasks: misc.Event[]) {
+	const res = await fetch("https://training.olinfo.it/api/user", {
+		method: "post",
+		body: JSON.stringify({
+			action: "get",
+			username,
+		}),
+		headers: { "Content-Type": "application/json" }
+	});
 
-	const res = await fetch(
-		url,
-		{
-			method: "post",
-			body: JSON.stringify(payload),
-			headers: { "Content-Type": "application/json" }
-		});
-	
 	const data: trainingUser = await res.json();
-	console.log(typeof data);
 	if (!data.success)
-		throw new Error(`Can't get scores of user {${user}}: does not exist`);
+		throw new Error("Invalid username");
 	
-	const scores: misc.Scores = {};
+	const scoresMap: {[key: string]: number} = {};
 	for (const t of data.scores) {
-		const link = `https://https://training.olinfo.it/#/task/${t.name}/statement`;
-		scores[link] = t.score; // insert by link, because names differ between stats & training
+		const chunks = t.name.split("_");
+		scoresMap[chunks[chunks.length - 1]] = t.score;
 	}
-
-	return scores;
+	
+	for (const year of tasks)
+		for (const t of year.tasks)
+			if (scoresMap[t.name] != undefined)
+				t.score = scoresMap[t.name];
 }
 
-const debug = async () => {
-	let time;
-
-	time = performance.now();
+export async function wrapper(data: misc.userData) {
 	const tasks = await getTasks();
-	console.log(`Time to get tasks: ${time}`);
-	console.log(tasks);
-
-	time = performance.now();
-	const scores = await getScores("v.bizzarri");
-	console.log(`Time to get scores: ${time}`);
-	console.log(scores);
+	if (data.user !== undefined)
+		await addScores(data.user, tasks);
+	return tasks;
 }
-
-// debug();
