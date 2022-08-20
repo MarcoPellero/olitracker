@@ -126,7 +126,7 @@ const normalizeTask = (task: statsYearTask): misc.Task => ({
 
 async function getTasks(): Promise<misc.Event[]> {
 	const years = misc.range(2000, new Date().getFullYear() + 1);
-	const statsId = "gphdM1jkKB5gEYSdkx8UD"; // need to scrape it from stats's HTML in case it changes
+	const statsId = "XBep9IDCqBxdgN3tlbD4B"; // need to scrape it from stats's HTML in case it changes
 	const url = (year: number) => `https://stats.olinfo.it/_next/data/${statsId}/contest/${year}.json`;
 
 	const arr = await Promise.all( years.map(y => fetch(url(y))) )
@@ -157,13 +157,13 @@ async function addScores(username: string, tasks: misc.Event[]) {
 	const data: trainingUser = await res.json();
 	if (!data.success)
 		throw new Error("Invalid username");
-	
-	const scoresMap: {[key: string]: number} = {};
+
+	const scoresMap: { [key: string]: number } = {};
 	for (const t of data.scores) {
 		const chunks = t.name.split("_");
 		scoresMap[chunks[chunks.length - 1]] = t.score;
 	}
-	
+
 	for (const year of tasks)
 		for (const t of year.tasks)
 			if (scoresMap[t.name] != undefined)
@@ -176,3 +176,12 @@ export async function wrapper(data: misc.userData) {
 		await addScores(data.user, tasks);
 	return tasks;
 }
+
+const debug = async () => {
+	console.log(await wrapper({
+		user: "marco_pellero",
+		password: ""
+	}));
+}
+
+// debug();
