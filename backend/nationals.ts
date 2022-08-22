@@ -125,23 +125,20 @@ const normalize_task = (task: StatsYearTask): misc.Task => ({
 });
 
 async function get_tasks(): Promise<misc.Event[]> {
-	const years = misc.range(2000, new Date().getFullYear() + 1);
 	const statsId = "XBep9IDCqBxdgN3tlbD4B"; // need to scrape it from stats's HTML in case it changes
 	const url = (year: number) => `https://stats.olinfo.it/_next/data/${statsId}/contest/${year}.json`;
 
-	const arr = await Promise.all( years.map(y => fetch(url(y))) )
-	const output: misc.Event[] = [];
-	for (const res of arr) {
-		if (!res.ok) continue;
+	const years = misc.range(2000, new Date().getFullYear() + 1);
+	const res_arr = await Promise.all(years.map(y => fetch(url(y)) ));
+	const data_arr: StatsYear[] = await Promise.all(
+		res_arr.filter(res => res.ok)
+		.map(async res => (await res.json()).pageProps)
+	);
 
-		const data: StatsYear = (await res.json()).pageProps;
-		output.push({
-			year: data.year,
-			tasks: data.contest.tasks.map(normalize_task)
-		});
-		}
-
-	return output;
+	return data_arr.map(data => ({
+		year: data.year,
+		tasks: data.contest.tasks.map(normalize_task)
+	}));
 }
 
 async function add_scores(username: string, tasks: misc.Event[]) {
@@ -160,14 +157,15 @@ async function add_scores(username: string, tasks: misc.Event[]) {
 
 	const scoresMap: { [key: string]: number } = {};
 	for (const t of data.scores) {
-		const chunks = t.name.split("_");
+		const chunks = t.name.split("_"); // separate names like "pre-egoi_carte" in ["pre-egoi", "carte"]
 		scoresMap[chunks[chunks.length - 1]] = t.score;
 	}
 
-	for (const year of tasks)
-		for (const t of year.tasks)
-			if (scoresMap[t.name] != undefined)
-				t.score = scoresMap[t.name];
+	tasks.map(ev => ev.tasks.map(t => {
+		if (scoresMap[t.name] != undefined)
+			t.score = scoresMap[t.name];
+	}))
+	
 }
 
 export async function wrapper(data: misc.UserData) {
@@ -178,10 +176,25 @@ export async function wrapper(data: misc.UserData) {
 }
 
 const debug = async () => {
-	console.log(await wrapper({
-		user: "marco_pellero",
-		password: ""
-	}));
+	let start, end;
+
+	start = performance.now();
+	const tasks = await get_tasks();
+	end = performance.now();
+	console.log(`Time to fetch tasks : ${end - start}`);
+
+	start = performance.now();
+	await add_scores("marco_pellero", tasks);
+	end = performance.now();
+	console.log(`Time to fetch scores : ${end - start}`);
+
+	console.log("Task names:");
+	for (const ev of tasks) {
+		let out: string = "";
+		for (const t of ev.tasks)
+			out += `${t.name}\t`;
+		console.log(`${ev.year}\t${out}`);
+	}
 }
 
-// debug();
+debug();
