@@ -1,18 +1,18 @@
 import fetch from "cross-fetch";
 import * as misc from "./misc.js";
 
-interface statsMedal {
+interface StatsMedal {
 	count: number,
 	cutoff: number
 }
 
-interface statsYearNavigation {
+interface StatsYearNavigation {
 	current: number,
 	next: null | number,
 	previous: null | number
 }
 
-interface statsStandaloneNavigation {
+interface StatsStandaloneNavigation {
 	current: {
 		year: number,
 		name: string,
@@ -27,7 +27,7 @@ interface statsStandaloneNavigation {
 	}
 }
 
-interface statsYearTask {
+interface StatsYearTask {
 	contest_year: number,
 	index: number,
 	link: null | string,
@@ -36,7 +36,7 @@ interface statsYearTask {
 	title: string
 }
 
-interface statsStandaloneScore {
+interface StatsStandaloneScore {
 	contestant: {
 		first_name: string,
 		last_name: string,
@@ -52,7 +52,7 @@ interface statsStandaloneScore {
 	score: number,
 }
 
-interface statsYearScore extends statsStandaloneScore {
+interface StatsYearScore extends StatsStandaloneScore {
 	medal: null | string,
 	past_partecipations: {
 		year: number,
@@ -62,12 +62,12 @@ interface statsYearScore extends statsStandaloneScore {
 	scores: number[]
 }
 
-interface statsStandaloneTask extends statsYearTask {
-	navigation: statsStandaloneNavigation,
-	scores: statsStandaloneScore[]
+interface StatsStandaloneTask extends StatsYearTask {
+	navigation: StatsStandaloneNavigation,
+	scores: StatsStandaloneScore[]
 }
 
-interface statsYear {
+interface StatsYear {
 	contest: {
 		avg_score: number,
 		location: {
@@ -79,19 +79,19 @@ interface statsYear {
 		max_score: number,
 		max_score_possible: number,
 		medals: {
-			bronze: statsMedal,
-			gold: statsMedal,
-			silver: statsMedal
+			bronze: StatsMedal,
+			gold: StatsMedal,
+			silver: StatsMedal
 		},
-		navigation: statsYearNavigation,
+		navigation: StatsYearNavigation,
 		num_contestants: number,
 		region: null | string,
-		tasks: statsYearTask[],
+		tasks: StatsYearTask[],
 		year: number
 	},
 	results: {
-		navigation: statsYearNavigation,
-		results: statsYearScore[],
+		navigation: StatsYearNavigation,
+		results: StatsYearScore[],
 		tasks: String[] // task names
 	},
 	year: number
@@ -116,7 +116,7 @@ interface trainingUser {
 	username: string
 }
 
-const normalizeTask = (task: statsYearTask): misc.Task => ({
+const normalize_task = (task: StatsYearTask): misc.Task => ({
 	name: task.name,
 	id: task.name,
 	link: task.link,
@@ -124,27 +124,24 @@ const normalizeTask = (task: statsYearTask): misc.Task => ({
 	max_score_possible: task.max_score_possible,
 });
 
-async function getTasks(): Promise<misc.Event[]> {
-	const years = misc.range(2000, new Date().getFullYear() + 1);
+async function get_tasks(): Promise<misc.Event[]> {
 	const statsId = "XBep9IDCqBxdgN3tlbD4B"; // need to scrape it from stats's HTML in case it changes
 	const url = (year: number) => `https://stats.olinfo.it/_next/data/${statsId}/contest/${year}.json`;
 
-	const arr = await Promise.all( years.map(y => fetch(url(y))) )
-	const output: misc.Event[] = [];
-	for (const res of arr) {
-		if (!res.ok) continue;
+	const years = misc.range(2000, new Date().getFullYear() + 1);
+	const res_arr = await Promise.all(years.map(y => fetch(url(y)) ));
+	const data_arr: StatsYear[] = await Promise.all(
+		res_arr.filter(res => res.ok)
+		.map(async res => (await res.json()).pageProps)
+	);
 
-		const data: statsYear = (await res.json()).pageProps;
-		output.push({
-			year: data.year,
-			tasks: data.contest.tasks.map(normalizeTask)
-		});
-	}
-
-	return output;
+	return data_arr.map(data => ({
+		year: data.year,
+		tasks: data.contest.tasks.map(normalize_task)
+	}));
 }
 
-async function addScores(username: string, tasks: misc.Event[]) {
+async function add_scores(username: string, tasks: misc.Event[]) {
 	const res = await fetch("https://training.olinfo.it/api/user", {
 		method: "post",
 		body: JSON.stringify({
@@ -160,28 +157,44 @@ async function addScores(username: string, tasks: misc.Event[]) {
 
 	const scoresMap: { [key: string]: number } = {};
 	for (const t of data.scores) {
-		const chunks = t.name.split("_");
+		const chunks = t.name.split("_"); // separate names like "pre-egoi_carte" in ["pre-egoi", "carte"]
 		scoresMap[chunks[chunks.length - 1]] = t.score;
 	}
 
-	for (const year of tasks)
-		for (const t of year.tasks)
-			if (scoresMap[t.name] != undefined)
-				t.score = scoresMap[t.name];
+	tasks.map(ev => ev.tasks.map(t => {
+		if (scoresMap[t.name] != undefined)
+			t.score = scoresMap[t.name];
+	}))
+	
 }
 
-export async function wrapper(data: misc.userData) {
-	const tasks = await getTasks();
+export async function wrapper(data: misc.UserData) {
+	const tasks = await get_tasks();
 	if (data.user !== undefined)
-		await addScores(data.user, tasks);
+		await add_scores(data.user, tasks);
 	return tasks;
 }
 
 const debug = async () => {
-	console.log(await wrapper({
-		user: "marco_pellero",
-		password: ""
-	}));
+	let start, end;
+
+	start = performance.now();
+	const tasks = await get_tasks();
+	end = performance.now();
+	console.log(`Time to fetch tasks : ${end - start}`);
+
+	start = performance.now();
+	await add_scores("marco_pellero", tasks);
+	end = performance.now();
+	console.log(`Time to fetch scores : ${end - start}`);
+
+	console.log("Task names:");
+	for (const ev of tasks) {
+		let out: string = "";
+		for (const t of ev.tasks)
+			out += `${t.name}\t`;
+		console.log(`${ev.year}\t${out}`);
+	}
 }
 
-// debug();
+debug();
