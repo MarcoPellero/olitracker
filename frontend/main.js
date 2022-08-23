@@ -52,7 +52,10 @@ async function display() {
 
 			if (t.score == 100) cell.classList.add("success");
 			else if (t.score == 0) cell.classList.add("fail");
-			else if (t.score != null) cell.classList.add("mixed");
+			else if (t.score != null) {
+				cell.classList.add("mixed");
+				cell.style("--percentage-done", `${t.score}%`)
+			}
 
 			row.append(cell);
 		}
