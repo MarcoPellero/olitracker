@@ -1,67 +1,108 @@
-const competitions = [];
-const siteURL = document.location.origin;
-let comp = []; // misc.Event[] (see ../backend/misc.ts)
+let supported_competitions // {name: string, code: string}[]
+const api_url = document.location.origin
 
-let user = "";
-let comp_name;
-
-async function select_user(username) {
-	user = username;
-	display();
+const user_data = {
+	name: "",
+	password: "",
+	selected_competition: -1 // index for supported_competitions element
 }
 
-async function select_competition(index) {
-	comp_name = competitions[index].code;
-	display();
-}
+// grab all the supported competitions from the API and display them
+fetch(`${api_url}/api/list`)
+	.then(async res => {
+		console.log("Fetching supported competitions")
+		const start = Date.now();
+		supported_competitions = await res.json()
+		console.log(`[${Date.now() - start}ms] Supported competitions:`, supported_competitions)
 
-async function startup() {
-	// grab all supported competitions
-	const res = await fetch(`${siteURL}/api/comps`);
-	competitions.push(...await res.json());
-	
-	const compList = $("#competitions");
-	for (const c of competitions)
-		compList.append(`<option>${c.name}</option>`);
-	compList.prop("selectedIndex", -1); // no initial state; messes up shit, especially if there's only 1 supported comp
-}
-
-async function display() {
-	let url = `${siteURL}/api/tasks?comp=${comp_name}`;
-	if (user) url += `&user=${user}`;
-
-	const res = await fetch(url);
-	comp = await res.json();
-	console.log(comp);
-	console.log(comp);
-
-	const table = $("#tasks");
-	table.empty();
-
-	for (const event of comp) {
-		const row = document.createElement("tr");
+		const dropdown_menu = $("#competitions")
+		for (const comp of supported_competitions)
+			dropdown_menu.append(`<option>${comp.name}</option>`)
 		
-		const head = document.createElement("th");
-		head.textContent = event.year;
-		row.append(head);
+		// removes the initial state from the menu
+		dropdown_menu.prop("selectedIndex", -1)
+	})
+	.catch(() => {
+		console.log("Failed to fetch list of supported competitions")
+		// popup some error message saying the API might be down and to retry later
+	})
 
-		for (const t of event.tasks) {
-			const cell = document.createElement("td");
-			cell.id = t.name;
-			cell.textContent = t.name;
+// takes in an Event[] (as defined in backend/misc.ts)
+const display = (events) => {
+	const table_elem = $("#tasks")
+	for (const ev of events) {
+		const row_elem = document.createElement("tr")
 
-			if (t.score == 100) cell.classList.add("success");
-			else if (t.score == 0) cell.classList.add("fail");
-			else if (t.score != null) {
-				cell.classList.add("mixed");
-				cell.style("--percentage-done", `${t.score}%`)
+		// year, month, any ID of when the competition took place
+		const timestamp_elem = document.createElement("th")
+		timestamp_elem.textContent = ev.year
+		row_elem.append(timestamp_elem)
+
+		// each element of ev.tasks is a Task object (as defined in backend/misc.ts)
+		for (const task of ev.tasks) {
+			const task_elem = document.createElement("td")
+			task_elem.textContent = task.name
+
+			if (task.score == 100)
+				task_elem.classList.add("success")
+			else if (task.score == 0)
+				task_elem.classList.add("fail")
+			else {
+				task_elem.classList.add("mixed")
+				// set --percentage-done CSS var to task.score
 			}
 
-			row.append(cell);
+			row_elem.append(task_elem)
 		}
-		
-		table.append(row);
+
+		table_elem.append(row_elem)
 	}
 }
 
-startup();
+// even though user_data is global, i prefer passing it, so this function can be used from the console
+const fetch_competition = async (req_data) => {
+	let query = `${api_url}/api/tasks?comp=${req_data.selected_competition}`
+
+	// append optional auth parameters
+	if (req_data.user)
+		query += `&user=${req_data.user}`
+
+	if (req_data.password)
+		query += `&password=${req_data.password}`
+
+	const start = Date.now()
+	console.log(`Fetching events with query: ${query}`)
+	const res = await fetch(query)
+
+	if (!res.ok)
+		console.log(`[${Date.now() - start}ms] Failed fetch ({${res.status}} : ${res.statusText})`)
+	else {
+		const events = await res.json()
+		console.log(`[${Date.now() - start}ms] fetched ${events.length} events`)
+		return events
+	}
+}
+
+// there's only 1 form so this selector is fine
+// fetches the task with the username, pulling the scores
+$("form").on("submit", () => {
+	user_data.name = $("#username").val()
+	// user_data.password = $("#password").val()
+
+	// if the username is loaded, but the competition isn't, don't make a request
+	// maybe popup some message?
+	if (user_data.selected_competition)
+		fetch_competition(user_data)
+			.then(display)
+
+	return false // prevents the page from reloading
+})
+
+// fetches the selected competition and fills the table
+$("#competitions").on("change", () => {
+	const index = $("#competitions").prop("selectedIndex")
+	user_data.selected_competition = supported_competitions[index].code
+
+	fetch_competition(user_data)
+		.then(display)
+})

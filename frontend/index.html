@@ -9,13 +9,13 @@
 
 <body>
 	<div> <!-- Section for selecting competitions & users -->
-		<form onsubmit="try { select_user($('#username').val()) } finally { return false }">
+		<form>
 			<input id="username" type="text" placeholder="User:">
 			<input type="submit" value="Select">
 		</form>
 
 		<label for="competitions">Choose a competition</label>
-		<select id="competitions" onchange="select_competition(this.selectedIndex)"></select> <!-- Populated thru JS -->
+		<select id="competitions"></select> <!-- Populated thru JS -->
 	</div>
 
 	<table id="tasks"></table> <!-- Populated thru JS -->
