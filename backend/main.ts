@@ -1,11 +1,32 @@
 import express from "express";
 import * as misc from "./misc.js";
 import * as oii from "./nationals.js";
+import * as ois from "./ois_team.js";
 
 const handlers: {[key: string]: misc.CompHandler} = {
 	"nationals": {
-		name: "nationals",
+		name: "OII",
 		getTasks: oii.wrapper
+	},
+	"ois_1": {
+		name: "OIS Round 1",
+		getTasks: (data) => ois.wrapper(data, 1)
+	},
+	"ois_2": {
+		name: "OIS Round 2",
+		getTasks: (data) => ois.wrapper(data, 2)
+	},
+	"ois_3": {
+		name: "OIS Round 3",
+		getTasks: (data) => ois.wrapper(data, 3)
+	},
+	"ois_4": {
+		name: "OIS Round 4",
+		getTasks: (data) => ois.wrapper(data, 4)
+	},
+	"ois_final": {
+		name: "OIS Finals",
+		getTasks: (data) => ois.wrapper(data, "final")
 	}
 };
 
@@ -27,11 +48,18 @@ app.get("/api/tasks", (req, res) => {
 	const password = req.query.password as string;
 	handler.getTasks({ user, password })
 		.then(tasks => res.json(tasks) )
-		.catch(err => res.status(500).send("Internal error probably caused by malformed request") );
+		.catch(err => {
+			res.status(500).send("Internal error probably caused by malformed request")
+			console.log(err);
+		});
 });
 
 app.get("/api/comps", (req, res) => {
-	res.json(Object.keys(handlers));
+	const comps: {code: string, name: string}[] = [];
+	for (const key in handlers)
+		comps.push({code: key, name: handlers[key].name});
+	
+	res.json(comps);
 });
 
 app.listen(port, () => {

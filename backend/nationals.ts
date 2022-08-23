@@ -159,7 +159,7 @@ const cache = () => {
 
 const cache_pull = cache();
 
-async function get_scores(username: string, unscored: misc.Event[]) {
+export async function get_scores(username: string, unscored: misc.Event[]) {
 	// deep clone of the input events, so the input isn't mutated
 	const scored: misc.Event[] = unscored.map(ev => {
 		let copy = Object.assign({}, ev);

@@ -1,4 +1,4 @@
-const competitions = []; // string[]; ["terry", "nationals", "pre-egoi"]
+const competitions = [];
 const siteURL = document.location.origin;
 let comp = []; // misc.Event[] (see ../backend/misc.ts)
 
@@ -11,7 +11,7 @@ async function select_user(username) {
 }
 
 async function select_competition(index) {
-	comp_name = competitions[index];
+	comp_name = competitions[index].code;
 	display();
 }
 
@@ -22,7 +22,7 @@ async function startup() {
 	
 	const compList = $("#competitions");
 	for (const c of competitions)
-		compList.append(`<option>${c}</option>`);
+		compList.append(`<option>${c.name}</option>`);
 	compList.prop("selectedIndex", -1); // no initial state; messes up shit, especially if there's only 1 supported comp
 }
 
