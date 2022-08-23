@@ -78,31 +78,27 @@ interface Edition extends BaseEdition {
 	}[]
 }
 
-function getInfo(): Promise<GeneralInfo> {
+function get_info(): Promise<GeneralInfo> {
 	const url = "https://squadre.olinfo.it/json/edition.json";
 	return fetch(url, { headers: { "Content-Type": "application/json" } })
 		.then(async (res) => await res.json())
-		.catch((err) => { throw new Error(`OIS.getInfo() fetch failed! error: ${err.message}`) });
+		.catch((err) => { throw new Error(`OIS.get_info() fetch failed! error: ${err.message}`) });
 }
 
-async function getEditions(info: GeneralInfo): Promise<Edition[]> {
+async function get_editions(info: GeneralInfo): Promise<Edition[]> {
 	const years: number[] = [];
 	for (const ed of info.editions)
 		years.push(ed.id);
 	years.sort()
 
 	const url = (year: number) => `https://squadre.olinfo.it/json/edition.${year}.json`;
-	/* return Promise.all( years.map(y => fetch(url(y))) )
-		.then(arr =>
-			arr.map(async res => await res.json() as Edition)
-			) */
 	const arr = await Promise.all( years.map(y => fetch(url(y))) );
 	const output: Edition[] = await Promise.all( arr.map(res => res.json()) );
 
 	return output;
 }
 
-function getTasks(ed: Edition) {
+function get_tasks(ed: Edition) {
 	Promise.all(ed.contests.map(contest => {
 		
 	}))
@@ -112,12 +108,12 @@ async function debug() {
 	let start;
 
 	start = performance.now();
-	const info = await getInfo();
+	const info = await get_info();
 	console.log(`Time to fetch GeneralInfo: ${performance.now() - start}`);
 	console.log(info);
 
 	start = performance.now();
-	const eds = await getEditions(info);
+	const eds = await get_editions(info);
 	console.log(`Time to fetch Edition[]: ${performance.now() - start}`);
 	console.log(eds);
 }
