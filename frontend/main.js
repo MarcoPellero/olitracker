@@ -1,6 +1,6 @@
 const competitions = []; // string[]; ["terry", "nationals", "pre-egoi"]
 const siteURL = document.location.origin;
-let comp = []; // misc.Task[][] (see ../backend/misc.ts)
+let comp = []; // misc.Event[] (see ../backend/misc.ts)
 
 let user = "";
 let comp_name;
@@ -32,6 +32,7 @@ async function display() {
 
 	const res = await fetch(url);
 	comp = await res.json();
+	console.log(comp);
 	console.log(comp);
 
 	const table = $("#tasks");

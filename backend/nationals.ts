@@ -124,7 +124,7 @@ const normalize_task = (task: StatsYearTask): misc.Task => ({
 	max_score_possible: task.max_score_possible,
 });
 
-async function get_tasks(): Promise<misc.Event[]> {
+async function get_comps(): Promise<misc.Event[]> {
 	const statsId = "XBep9IDCqBxdgN3tlbD4B"; // need to scrape it from stats's HTML in case it changes
 	const url = (year: number) => `https://stats.olinfo.it/_next/data/${statsId}/contest/${year}.json`;
 
@@ -141,7 +141,32 @@ async function get_tasks(): Promise<misc.Event[]> {
 	}));
 }
 
-async function add_scores(username: string, tasks: misc.Event[]) {
+const cache = () => {
+	let timer = 0; // epoch timestamp of last data fetch
+	let data: misc.Event[];
+
+	const pull = async () => {
+		if (Date.now() - timer >= 24 * 60 * 60 * 1000) { // 1d in ms
+			data = await get_comps();
+			timer = Date.now();
+		}
+		
+		return data;
+	}
+
+	return pull;
+}
+
+const cache_pull = cache();
+
+async function get_scores(username: string, unscored: misc.Event[]) {
+	// deep clone of the input events, so the input isn't mutated
+	const scored: misc.Event[] = unscored.map(ev => {
+		let copy = Object.assign({}, ev);
+		copy.tasks = ev.tasks.map(t => Object.assign({}, t));
+		return copy;
+	});
+
 	const res = await fetch("https://training.olinfo.it/api/user", {
 		method: "post",
 		body: JSON.stringify({
@@ -155,46 +180,41 @@ async function add_scores(username: string, tasks: misc.Event[]) {
 	if (!data.success)
 		throw new Error("Invalid username");
 
+	
+	// create a map to match task names to their score, to match all OII tasks
 	const scoresMap: { [key: string]: number } = {};
 	for (const t of data.scores) {
 		const chunks = t.name.split("_"); // separate names like "pre-egoi_carte" in ["pre-egoi", "carte"]
 		scoresMap[chunks[chunks.length - 1]] = t.score;
 	}
 
-	tasks.map(ev => ev.tasks.map(t => {
-		if (scoresMap[t.name] != undefined)
-			t.score = scoresMap[t.name];
+	scored.map(comp => comp.tasks.map(task => {
+		task.score = scoresMap[task.name] || null;
 	}))
-	
+
+	return scored;
 }
 
 export async function wrapper(data: misc.UserData) {
-	const tasks = await get_tasks();
+	const unscored = await cache_pull();
 	if (data.user !== undefined)
-		await add_scores(data.user, tasks);
-	return tasks;
+		return await get_scores(data.user, unscored);
+	return unscored;
 }
 
 const debug = async () => {
 	let start, end;
+	const username = "Francesco3779";
 
 	start = performance.now();
-	const tasks = await get_tasks();
+	const unscored = await cache_pull();
 	end = performance.now();
-	console.log(`Time to fetch tasks : ${end - start}`);
+	console.log(`Time to fetch tasks : ${end - start}ms`);
 
 	start = performance.now();
-	await add_scores("marco_pellero", tasks);
+	const scored = await get_scores(username, unscored);
 	end = performance.now();
-	console.log(`Time to fetch scores : ${end - start}`);
-
-	console.log("Task names:");
-	for (const ev of tasks) {
-		let out: string = "";
-		for (const t of ev.tasks)
-			out += `${t.name}\t`;
-		console.log(`${ev.year}\t${out}`);
-	}
+	console.log(`Time to fetch scores for use {${username}}: ${end - start}ms`);
 }
 
-debug();
+// debug();
