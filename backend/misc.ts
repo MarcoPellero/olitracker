@@ -14,11 +14,11 @@ export interface Event { // any competition event like IOI2021
 export interface UserData {
 	user: undefined | string,
 	password: undefined | string
-};
+}
 
 export interface CompHandler {
 	name: string,
 	getTasks(data: UserData): Promise<Event[]>
 }
 
-export const range = (from: number, to: number) => Array.from({length: to-from}, (x, i) => from + i);
+export const range = (from: number, to: number) => Array.from({length: to-from}, (x, i) => from + i)

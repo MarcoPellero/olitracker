@@ -11,7 +11,7 @@ const user_data = {
 fetch(`${api_url}/api/list`)
 	.then(async res => {
 		console.log("Fetching supported competitions")
-		const start = Date.now();
+		const start = Date.now()
 		supported_competitions = await res.json()
 		console.log(`[${Date.now() - start}ms] Supported competitions:`, supported_competitions)
 

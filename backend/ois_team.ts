@@ -1,6 +1,6 @@
-import fetch from "cross-fetch";
-import * as misc from "./misc.js";
-import { get_scores } from "./nationals.js";
+import fetch from "cross-fetch"
+import * as misc from "./misc.js"
+import { get_scores } from "./nationals.js"
 
 interface BaseEdition {
 	average: number,
@@ -112,32 +112,32 @@ interface Round  {
 }
 
 function get_info(): Promise<GeneralInfo> {
-	const url = "https://squadre.olinfo.it/json/edition.json";
+	const url = "https://squadre.olinfo.it/json/edition.json"
 	return fetch(url, { headers: { "Content-Type": "application/json" } })
 		.then(async (res) => await res.json())
-		.catch((err) => { throw new Error(`OIS.get_info() fetch failed! error: ${err.message}`) });
+		.catch((err) => { throw new Error(`OIS.get_info() fetch failed! error: ${err.message}`) })
 }
 
-// somewhat deprecated; i don't grab the whole edition anymore, i grab the single rounds
+// somewhat deprecated i don't grab the whole edition anymore, i grab the single rounds
 async function get_editions(info: GeneralInfo): Promise<Edition[]> {
-	const years: number[] = [];
+	const years: number[] = []
 	for (const ed of info.editions)
-		years.push(ed.id);
-	years.sort((a, b) => b - a);
+		years.push(ed.id)
+	years.sort((a, b) => b - a)
 
-	const url = (year: number) => `https://squadre.olinfo.it/json/edition.${year}.json`;
-	const arr = await Promise.all( years.map(y => fetch(url(y))) );
-	const output: Edition[] = await Promise.all( arr.map(res => res.json()) );
+	const url = (year: number) => `https://squadre.olinfo.it/json/edition.${year}.json`
+	const arr = await Promise.all( years.map(y => fetch(url(y))) )
+	const output: Edition[] = await Promise.all( arr.map(res => res.json()) )
 
-	return output;
+	return output
 }
 
 async function get_round(info: GeneralInfo, round: number | "final"): Promise<misc.Event[]> {
-	const years = info.editions.map(ed => ed.id).sort();
-	const url = (y: number) => `https://squadre.olinfo.it/json/edition.${y}.round.${round}.json`;
+	const years = info.editions.map(ed => ed.id).sort()
+	const url = (y: number) => `https://squadre.olinfo.it/json/edition.${y}.round.${round}.json`
 
-	const res_arr = await Promise.all(years.map(y => fetch(url(y)) ));
-	const data_arr: Round[] = await Promise.all(res_arr.map(res => res.json()));
+	const res_arr = await Promise.all(years.map(y => fetch(url(y)) ))
+	const data_arr: Round[] = await Promise.all(res_arr.map(res => res.json()))
 
 	return data_arr.map(
 		data => ({
@@ -155,25 +155,25 @@ async function get_round(info: GeneralInfo, round: number | "final"): Promise<mi
 }
 
 export async function wrapper(data: misc.UserData, round_filter: number | "final") {
-	const info = await get_info();
-	const unscored = await get_round(info, round_filter);
+	const info = await get_info()
+	const unscored = await get_round(info, round_filter)
 
 	if (data.user !== undefined)
-		return await get_scores(data.user, unscored);
+		return await get_scores(data.user, unscored)
 	
-	return unscored;
+	return unscored
 }
 
 async function debug() {
-	let start;
+	let start
 
-	start = performance.now();
-	const info = await get_info();
-	console.log(`Time to fetch GeneralInfo: ${performance.now() - start}`);
+	start = performance.now()
+	const info = await get_info()
+	console.log(`Time to fetch GeneralInfo: ${performance.now() - start}`)
 
-	start = performance.now();
-	const tasks = get_round(info, 1);
-	console.log(`Time to fetch Event[]: ${performance.now() - start}`);
+	start = performance.now()
+	const tasks = get_round(info, 1)
+	console.log(`Time to fetch Event[]: ${performance.now() - start}`)
 }
 
-// debug();
+// debug()
