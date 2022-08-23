@@ -54,7 +54,7 @@ app.get("/api/tasks", (req, res) => {
 		})
 })
 
-app.get("/api/comps", (req, res) => {
+app.get("/api/list", (req, res) => {
 	const comps: {code: string, name: string}[] = []
 	for (const key in handlers)
 		comps.push({code: key, name: handlers[key].name})
