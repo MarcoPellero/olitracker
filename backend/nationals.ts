@@ -1,4 +1,4 @@
-import fetch from "cross-fetch"
+import axios from "axios"
 import * as misc from "./misc.js"
 
 interface StatsMedal {
@@ -129,11 +129,17 @@ async function get_comps(): Promise<misc.Event[]> {
 	const url = (year: number) => `https://stats.olinfo.it/_next/data/${statsId}/contest/${year}.json`
 
 	const years = misc.range(2000, new Date().getFullYear() + 1)
-	const res_arr = await Promise.all(years.map(y => fetch(url(y)) ))
-	const data_arr: StatsYear[] = await Promise.all(
-		res_arr.filter(res => res.ok)
-		.map(async res => (await res.json()).pageProps)
+	const res_arr = await Promise.allSettled(
+		years.map(y => axios.get(url(y)) )
 	)
+
+	const data_arr: StatsYear[] = []
+	for (const res of res_arr) {
+		if (res.status == "rejected")
+			continue
+		
+		data_arr.push(res.value.data.pageProps)
+	}
 
 	return data_arr.map(data => ({
 		year: data.year,
@@ -167,16 +173,12 @@ export async function get_scores(username: string, unscored: misc.Event[]) {
 		return copy
 	})
 
-	const res = await fetch("https://training.olinfo.it/api/user", {
-		method: "post",
-		body: JSON.stringify({
-			action: "get",
-			username,
-		}),
-		headers: { "Content-Type": "application/json" }
+	const res = await axios.post("https://training.olinfo.it/api/user", {
+		action: "get",
+		username
 	})
-
-	const data: trainingUser = await res.json()
+	const data = res.data
+	
 	if (!data.success)
 		throw new Error("Invalid username")
 

@@ -1,4 +1,4 @@
-import fetch from "cross-fetch"
+import axios from "axios"
 import * as misc from "./misc.js"
 import { get_scores } from "./nationals.js"
 
@@ -113,8 +113,8 @@ interface Round  {
 
 function get_info(): Promise<GeneralInfo> {
 	const url = "https://squadre.olinfo.it/json/edition.json"
-	return fetch(url, { headers: { "Content-Type": "application/json" } })
-		.then(async (res) => await res.json())
+	return axios.get(url)
+		.then(res => res.data)
 		.catch((err) => { throw new Error(`OIS.get_info() fetch failed! error: ${err.message}`) })
 }
 
@@ -126,18 +126,36 @@ async function get_editions(info: GeneralInfo): Promise<Edition[]> {
 	years.sort((a, b) => b - a)
 
 	const url = (year: number) => `https://squadre.olinfo.it/json/edition.${year}.json`
-	const arr = await Promise.all( years.map(y => fetch(url(y))) )
-	const output: Edition[] = await Promise.all( arr.map(res => res.json()) )
+	const res_arr = await Promise.allSettled(
+		years.map(y => axios.get(url(y)) )
+	)
 
-	return output
+	const data_arr: Edition[] = []
+	for (const res of res_arr) {
+		if (res.status == "rejected")
+			continue
+		
+		data_arr.push(res.value.data)
+	}
+
+	return data_arr
 }
 
 async function get_round(info: GeneralInfo, round: number | "final"): Promise<misc.Event[]> {
 	const years = info.editions.map(ed => ed.id).sort()
 	const url = (y: number) => `https://squadre.olinfo.it/json/edition.${y}.round.${round}.json`
 
-	const res_arr = await Promise.all(years.map(y => fetch(url(y)) ))
-	const data_arr: Round[] = await Promise.all(res_arr.map(res => res.json()))
+	const res_arr = await Promise.allSettled(
+		years.map(y => axios.get(url(y)) )
+	)
+
+	const data_arr: Round[] = []
+	for (const res of res_arr) {
+		if (res.status == "rejected")
+			continue
+		
+		data_arr.push(res.value.data)
+	}
 
 	return data_arr.map(
 		data => ({
