@@ -30,7 +30,7 @@ fetch(`${api_url}/api/list`)
 // takes in an Event[] (as defined in backend/misc.ts)
 const display = (events) => {
 	const table_elem = $("#tasks")
-	table_elem.empty();
+	table_elem.empty()
 
 	for (const ev of events) {
 		const row_elem = document.createElement("tr")
@@ -74,10 +74,11 @@ const fetch_competition = async (req_data) => {
 
 	const start = Date.now()
 	console.log(`Fetching events with query: ${query}`)
+
 	const res = await fetch(query)
 
 	if (!res.ok)
-		console.log(`[${Date.now() - start}ms] Failed fetch ({${res.status}} : ${res.statusText})`)
+		throw new Error(`[${Date.now() - start}ms] Failed to fetch events ({${res.status}} : ${res.statusText})`)
 	else {
 		const events = await res.json()
 		console.log(`[${Date.now() - start}ms] Events:`, events)
@@ -90,6 +91,7 @@ const fetch_competition = async (req_data) => {
 $("form").on("submit", () => {
 	user_data.name = $("#username").val()
 	// user_data.password = $("#password").val()
+	console.log("User form submitted; user data:", user_data)
 
 	// if the username is loaded, but the competition isn't, don't make a request
 	// maybe popup some message?
