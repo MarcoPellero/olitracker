@@ -30,6 +30,8 @@ fetch(`${api_url}/api/list`)
 // takes in an Event[] (as defined in backend/misc.ts)
 const display = (events) => {
 	const table_elem = $("#tasks")
+	table_elem.empty();
+
 	for (const ev of events) {
 		const row_elem = document.createElement("tr")
 
@@ -47,7 +49,7 @@ const display = (events) => {
 				task_elem.classList.add("success")
 			else if (task.score == 0)
 				task_elem.classList.add("fail")
-			else {
+			else if (task.score) { // ignore null (default score)
 				task_elem.classList.add("mixed")
 				// set --percentage-done CSS var to task.score
 			}
@@ -64,8 +66,8 @@ const fetch_competition = async (req_data) => {
 	let query = `${api_url}/api/tasks?comp=${req_data.selected_competition}`
 
 	// append optional auth parameters
-	if (req_data.user)
-		query += `&user=${req_data.user}`
+	if (req_data.name)
+		query += `&user=${req_data.name}`
 
 	if (req_data.password)
 		query += `&password=${req_data.password}`
@@ -78,7 +80,7 @@ const fetch_competition = async (req_data) => {
 		console.log(`[${Date.now() - start}ms] Failed fetch ({${res.status}} : ${res.statusText})`)
 	else {
 		const events = await res.json()
-		console.log(`[${Date.now() - start}ms] fetched ${events.length} events`)
+		console.log(`[${Date.now() - start}ms] Events:`, events)
 		return events
 	}
 }
@@ -91,7 +93,7 @@ $("form").on("submit", () => {
 
 	// if the username is loaded, but the competition isn't, don't make a request
 	// maybe popup some message?
-	if (user_data.selected_competition)
+	if (user_data.selected_competition != -1)
 		fetch_competition(user_data)
 			.then(display)
 
