@@ -133,7 +133,7 @@ const associate_scores = (events, scores) => {
 			link: task.link,
 			id: task.id,
 			max_score_possible: task.max_score_possible,
-			score: scores[task.name] || null
+			score: scores[task.name] === undefined ? null : scores[task.name]
 		}))
 	}))
 	
