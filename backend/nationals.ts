@@ -178,7 +178,11 @@ export const handler: misc.CompHandler = {
 		
 		return get_scores(data.user)
 	},
-	get_sub_competitions: () => []
+
+	has_sub_competitions: false,
+	get_sub_competitions: () => [],
+
+	cache_max_age: 6 * 60 * 60 * 1000 // 6h in ms
 }
 
 const debug = async () => {

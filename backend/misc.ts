@@ -33,8 +33,20 @@ export interface CompHandler {
 	name: string,
 	get_tasks(data: ApiQuery): Promise<Event[]>,
 	get_scores(data: ApiQuery): Promise<ScoresMap>,
-	get_sub_competitions(): CompetitionInfo[]
+
+	has_sub_competitions: boolean,
+	get_sub_competitions(): CompetitionInfo[],
+
+	cache_max_age: number // as used for HandlerCache; in ms
 }
+
+export interface HandlerCache {[token: string]: {
+	// max_age is defined in the handler itself
+	timer: number,
+	data: Event[]
+}}
+
+export const cache_token = (code: string, round: undefined | number | string) => `code=${code}&round=${round}`
 
 export const range = (from: number, to: number, step: number = 1) => {
 	const output: number[] = []

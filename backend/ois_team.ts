@@ -186,6 +186,8 @@ export const handler: misc.CompHandler = {
 		return get_round(info, selected_round)
 	},
 	get_scores: oii.handler.get_scores,
+
+	has_sub_competitions: true,
 	get_sub_competitions: () => {
 		const rounds: misc.CompetitionInfo[] = []
 		for (let i = 1; i < 5; i++)
@@ -193,7 +195,9 @@ export const handler: misc.CompHandler = {
 		rounds.push({code: "ois", name: "OIS Finals", round: "final"})
 		
 		return rounds
-	}
+	},
+
+	cache_max_age: 6 * 60 * 60 * 1000 // 6h in ms
 }
 
 async function debug() {

@@ -4,8 +4,23 @@ import * as oii from "./nationals.js"
 import * as ois from "./ois_team.js"
 
 const handlers: {[key: string]: misc.CompHandler} = {
-	"nationals": oii.handler,
+	"oii": oii.handler,
 	"ois": ois.handler
+}
+
+const handlers_cache: misc.HandlerCache = {}
+for (const key in handlers) {
+	if (handlers[key].has_sub_competitions)
+		for (const sub of handlers[key].get_sub_competitions())
+			handlers_cache[misc.cache_token(sub.code, sub.round)] = {
+				timer: 0,
+				data: []
+			}
+	else
+		handlers_cache[misc.cache_token(handlers[key].code, undefined)] = {
+			timer: 0,
+			data: []
+		}
 }
 
 const port = process.env.PORT || 8080
@@ -25,11 +40,27 @@ app.get("/api/tasks", (req, res) => {
 		console.log(`[${req_id}] GET /api/tasks => 400 Invalid competition`)
 		res.status(400).send("Invalid competition")
 		return
+	} else if (handler.has_sub_competitions && data.round === undefined) {
+		console.log(`[${req_id}] GET /api/tasks => 400 No round selected`)
+		res.status(400).send("No round selected")
+		return
+	}
+
+	const last_cache = handlers_cache[misc.cache_token(handler.code, data.round)]
+	console.log(last_cache)
+	if (Date.now() - last_cache.timer < handler.cache_max_age) {
+		console.log(`[${req_id}] GET /api/tasks => 200 Cache HIT`)
+		res.json(last_cache.data)
+		return
 	}
 	
 	handler.get_tasks(data)
 		.then(events => {
-			console.log(`[${req_id}] GET /api/tasks => 200`)
+			handlers_cache[misc.cache_token(data.comp, data.round)] = {
+				timer: Date.now(),
+				data: events
+			}
+			console.log(`[${req_id}] GET /api/tasks => 200 Cache MISS`)
 			res.json(events)
 		})
 		.catch(err => {
@@ -70,9 +101,8 @@ app.get("/api/list", (req, res) => {
 
 	const competition_list: misc.CompetitionInfo[] = []
 	for (const code in handlers) {
-		const sub_competitions = handlers[code].get_sub_competitions()
-		if (sub_competitions.length)
-			competition_list.push(...sub_competitions)
+		if (handlers[code].has_sub_competitions)
+			competition_list.push(...handlers[code].get_sub_competitions())
 		else
 			competition_list.push({code, name: handlers[code].name, round: undefined})
 	}
