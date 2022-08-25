@@ -128,7 +128,7 @@ async function get_comps(): Promise<misc.Event[]> {
 	const statsId = "XBep9IDCqBxdgN3tlbD4B" // need to scrape it from stats's HTML in case it changes
 	const url = (year: number) => `https://stats.olinfo.it/_next/data/${statsId}/contest/${year}.json`
 
-	const years = misc.range(2000, new Date().getFullYear() + 1)
+	const years = misc.range(new Date().getFullYear(), 2000, -1)
 	const res_arr = await Promise.allSettled(
 		years.map(y => axios.get(url(y)) )
 	)

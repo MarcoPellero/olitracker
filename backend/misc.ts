@@ -36,4 +36,10 @@ export interface CompHandler {
 	get_sub_competitions(): CompetitionInfo[]
 }
 
-export const range = (from: number, to: number) => Array.from({length: to-from}, (x, i) => from + i)
+export const range = (from: number, to: number, step: number = 1) => {
+	const output: number[] = []
+	for (let i = from; i != to; i += step)
+		output.push(i)
+	
+	return output
+}
