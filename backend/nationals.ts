@@ -147,61 +147,38 @@ async function get_comps(): Promise<misc.Event[]> {
 	}))
 }
 
-const cache = () => {
-	let timer = 0 // epoch timestamp of last data fetch
-	let data: misc.Event[]
-
-	const pull = async () => {
-		if (Date.now() - timer >= 24 * 60 * 60 * 1000) { // 1d in ms
-			data = await get_comps()
-			timer = Date.now()
-		}
-		
-		return data
-	}
-
-	return pull
-}
-
-const cache_pull = cache()
-
-export async function get_scores(username: string, unscored: misc.Event[]) {
-	// deep clone of the input events, so the input isn't mutated
-	const scored: misc.Event[] = unscored.map(ev => {
-		let copy = Object.assign({}, ev)
-		copy.tasks = ev.tasks.map(t => Object.assign({}, t))
-		return copy
-	})
-
-	const res = await axios.post("https://training.olinfo.it/api/user", {
+async function get_scores(username: string) {
+	const api_url = "https://training.olinfo.it/api/user"
+	const payload = {
 		action: "get",
 		username
-	})
-	const data = res.data
-	
-	if (!data.success)
-		throw new Error("Invalid username")
-
-	
-	// create a map to match task names to their score, to match all OII tasks
-	const scoresMap: { [key: string]: number } = {}
-	for (const t of data.scores) {
-		const chunks = t.name.split("_") // separate names like "pre-egoi_carte" in ["pre-egoi", "carte"]
-		scoresMap[chunks[chunks.length - 1]] = t.score
 	}
 
-	scored.map(comp => comp.tasks.map(task => {
-		task.score = scoresMap[task.name] || null
-	}))
+	const res = await axios.post(api_url, payload)
+	const profile: trainingUser = res.data
 
-	return scored
+	if (!profile.success)
+		throw new Error("Invalid user")
+	
+	const mapping: misc.ScoresMap = {}
+	for (const task of profile.scores) {
+		let chunks = task.name.split("_")
+		mapping[chunks[chunks.length-1]] = task.score
+	}
+	return mapping
 }
 
-export async function wrapper(data: misc.UserData) {
-	const unscored = await cache_pull()
-	if (data.user !== undefined)
-		return await get_scores(data.user, unscored)
-	return unscored
+export const handler: misc.CompHandler = {
+	code: "oii",
+	name: "nationals",
+	get_tasks: (data: misc.ApiQuery) => get_comps(), // uncached
+	get_scores: (data: misc.ApiQuery) => {
+		if (data.user === undefined)
+			throw new Error("No user provided")
+		
+		return get_scores(data.user)
+	},
+	get_sub_competitions: () => []
 }
 
 const debug = async () => {
@@ -209,14 +186,14 @@ const debug = async () => {
 	const username = "Francesco3779"
 
 	start = performance.now()
-	const unscored = await cache_pull()
+	const unscored = await get_comps()
 	end = performance.now()
 	console.log(`Time to fetch tasks : ${end - start}ms`)
 
-	start = performance.now()
+	/* start = performance.now()
 	const scored = await get_scores(username, unscored)
 	end = performance.now()
-	console.log(`Time to fetch scores for use {${username}}: ${end - start}ms`)
+	console.log(`Time to fetch scores for user {${username}}: ${end - start}ms`) */
 }
 
 // debug()

@@ -4,30 +4,8 @@ import * as oii from "./nationals.js"
 import * as ois from "./ois_team.js"
 
 const handlers: {[key: string]: misc.CompHandler} = {
-	"nationals": {
-		name: "OII",
-		getTasks: oii.wrapper
-	},
-	"ois_1": {
-		name: "OIS Round 1",
-		getTasks: (data) => ois.wrapper(data, 1)
-	},
-	"ois_2": {
-		name: "OIS Round 2",
-		getTasks: (data) => ois.wrapper(data, 2)
-	},
-	"ois_3": {
-		name: "OIS Round 3",
-		getTasks: (data) => ois.wrapper(data, 3)
-	},
-	"ois_4": {
-		name: "OIS Round 4",
-		getTasks: (data) => ois.wrapper(data, 4)
-	},
-	"ois_final": {
-		name: "OIS Finals",
-		getTasks: (data) => ois.wrapper(data, "final")
-	}
+	"nationals": oii.handler,
+	"ois": ois.handler
 }
 
 const port = process.env.PORT || 8080
@@ -36,18 +14,34 @@ const app = express()
 app.use(express.static("../frontend/"))
 
 app.get("/api/tasks", (req, res) => {
-	const comp = req.query.comp as string
+	const data: misc.ApiQuery = req.query as unknown as misc.ApiQuery
+	console.log("/api/tasks query:", data)
 
-	const handler = handlers[comp]
-	if (typeof handler == "undefined") {
+	const handler = handlers[data.comp]
+	if (handler === undefined) {
 		res.status(400).send("Invalid competition")
 		return
 	}
 	
-	const user = req.query.user as string
-	const password = req.query.password as string
-	handler.getTasks({ user, password })
-		.then(tasks => res.json(tasks) )
+	handler.get_tasks(data)
+		.then(events => res.json(events))
+		.catch(err => {
+			res.status(500).send("Internal error probably caused by malformed request")
+			console.log(err)
+		})
+})
+
+app.get("/api/scores", (req, res) => {
+	const data: misc.ApiQuery = req.query as unknown as misc.ApiQuery
+
+	const handler = handlers[data.comp]
+	if (handler === undefined) {
+		res.status(400).send("Invalid competition")
+		return
+	}
+	
+	handler.get_scores(data)
+		.then(scores => res.json(scores))
 		.catch(err => {
 			res.status(500).send("Internal error probably caused by malformed request")
 			console.log(err)
@@ -55,11 +49,18 @@ app.get("/api/tasks", (req, res) => {
 })
 
 app.get("/api/list", (req, res) => {
-	const comps: {code: string, name: string}[] = []
-	for (const key in handlers)
-		comps.push({code: key, name: handlers[key].name})
+	const data: misc.ApiQuery = req.query as unknown as misc.ApiQuery
+
+	const competition_list: misc.CompetitionInfo[] = []
+	for (const code in handlers) {
+		const sub_competitions = handlers[code].get_sub_competitions()
+		if (sub_competitions.length)
+			competition_list.push(...sub_competitions)
+		else
+			competition_list.push({code, name: handlers[code].name, round: undefined})
+	}
 	
-	res.json(comps)
+	res.json(competition_list)
 })
 
 app.listen(port, () => {

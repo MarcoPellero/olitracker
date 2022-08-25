@@ -1,6 +1,8 @@
 import axios from "axios"
 import * as misc from "./misc.js"
-import { get_scores } from "./nationals.js"
+import * as oii from "./nationals.js"
+
+const first_edition = 2008
 
 interface BaseEdition {
 	average: number,
@@ -142,7 +144,7 @@ async function get_editions(info: GeneralInfo): Promise<Edition[]> {
 }
 
 async function get_round(info: GeneralInfo, round: number | "final"): Promise<misc.Event[]> {
-	const years = info.editions.map(ed => ed.id).sort()
+	const years = info.editions.map(ed => ed.id).sort((a, b) => b - a)
 	const url = (y: number) => `https://squadre.olinfo.it/json/edition.${y}.round.${round}.json`
 
 	const res_arr = await Promise.allSettled(
@@ -159,7 +161,7 @@ async function get_round(info: GeneralInfo, round: number | "final"): Promise<mi
 
 	return data_arr.map(
 		data => ({
-			year: data.ed_num,
+			year: first_edition + data.ed_num,
 			tasks: data.tasks.map(task => ({
 				name: task.name,
 				title: task.title,
@@ -172,14 +174,25 @@ async function get_round(info: GeneralInfo, round: number | "final"): Promise<mi
 	)
 }
 
-export async function wrapper(data: misc.UserData, round_filter: number | "final") {
-	const info = await get_info()
-	const unscored = await get_round(info, round_filter)
+export const handler: misc.CompHandler = {
+	code: "ois",
+	"name": "team olympiads",
+	get_tasks: async (data: misc.ApiQuery) => {
+		const selected_round = data.round
+		if (selected_round === undefined)
+			throw new Error(`OIS: no round selected`)
 
-	if (data.user !== undefined)
-		return await get_scores(data.user, unscored)
-	
-	return unscored
+		const info = await get_info()
+		return get_round(info, selected_round)
+	},
+	get_scores: oii.handler.get_scores,
+	get_sub_competitions: () => {
+		const rounds: misc.CompetitionInfo[] = [{code: "ois", name: "OIS Finals", round: "final"}]
+		for (let i = 1; i < 5; i++)
+			rounds.push({code: `ois`, name: `OIS Round ${i}`, round: i})
+		
+		return rounds
+	}
 }
 
 async function debug() {

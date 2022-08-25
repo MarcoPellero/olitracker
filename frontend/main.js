@@ -1,17 +1,19 @@
-let supported_competitions // {name: string, code: string}[]
-const api_url = document.location.origin
+let supported_competitions // {name: string, code: string, round: undefined | string | number}[]
 
 const user_data = {
 	name: "",
 	password: "",
-	selected_competition: -1 // index for supported_competitions element
+	selected_competition: {
+		code: "",
+		round: undefined
+	}
 }
 
 // grab all the supported competitions from the API and display them
-fetch(`${api_url}/api/list`)
+console.log("Fetching supported competitions")
+const start = Date.now()
+fetch(`/api/list`)
 	.then(async res => {
-		console.log("Fetching supported competitions")
-		const start = Date.now()
 		supported_competitions = await res.json()
 		console.log(`[${Date.now() - start}ms] Supported competitions:`, supported_competitions)
 
@@ -23,7 +25,7 @@ fetch(`${api_url}/api/list`)
 		dropdown_menu.prop("selectedIndex", -1)
 	})
 	.catch(() => {
-		console.log("Failed to fetch list of supported competitions")
+		console.log(`[${Date.now() - start}] Failed to fetch list of supported competitions`)
 		// popup some error message saying the API might be down and to retry later
 	})
 
@@ -61,20 +63,25 @@ const display = (events) => {
 	}
 }
 
-// even though user_data is global, i prefer passing it, so this function can be used from the console
 const fetch_competition = async (req_data) => {
-	let query = `${api_url}/api/tasks?comp=${req_data.selected_competition}`
+	if (!req_data.selected_competition)
+		throw new Error("No competition specified; can't fetch")
 
-	// append optional auth parameters
-	if (req_data.name)
-		query += `&user=${req_data.name}`
+	const cache_token = `code=${req_data.selected_competition.code}&round=${req_data.selected_competition.round}`
+	
+	if (this.cache === undefined)
+		this.cache = {} // {competition code : events}
+	else if (this.cache[cache_token] !== undefined) {
+		console.log(`Cache hit: ${cache_token}`)
+		return this.cache[cache_token]
+	}
 
-	if (req_data.password)
-		query += `&password=${req_data.password}`
+	let query = `/api/tasks?comp=${req_data.selected_competition.code}`
+	if (req_data.selected_competition.round !== undefined)
+		query += `&round=${req_data.selected_competition.round}`
 
 	const start = Date.now()
 	console.log(`Fetching events with query: ${query}`)
-
 	const res = await fetch(query)
 
 	if (!res.ok)
@@ -82,8 +89,48 @@ const fetch_competition = async (req_data) => {
 	else {
 		const events = await res.json()
 		console.log(`[${Date.now() - start}ms] Events:`, events)
+
+		this.cache[cache_token] = events
 		return events
 	}
+}
+
+const fetch_scores = async (req_data) => {
+	if (!req_data.name)
+		throw new Error("Can't fetch scores if no user is provided")
+	
+	if (this.cache === undefined)
+		this.cache = {} // {name : scores}
+	else if (this.cache[req_data.name] !== undefined)
+		return this.cache[req_data.name]
+
+	let query = `/api/scores?comp=${req_data.selected_competition.code}&user=${req_data.name}`
+	if (req_data.password)
+		query += `&password=${req_data.password}`
+	if (req_data.selected_competition.round !== undefined)
+		query += `&round=${req_data.selected_competition.round}`
+
+	const start = Date.now()
+	console.log(`Fetching scores with query: ${query}`)
+	const res = await fetch(query)
+
+	if (!res.ok)
+		throw new Error(`[${Date.now() - start}ms] Failed to fetch scores ({${res.status}} : ${res.statusText})`)
+	else {
+		const scores = await res.json()
+		console.log(`[${Date.now() - start}ms] scores:`, scores)
+
+		this.cache[req_data.name] = scores
+		return scores
+	}
+}
+
+const associate_scores = (events, scores) => {
+	for (const ev of events)
+		for (const task of ev.tasks)
+			task.score = scores[task.name] || null
+	
+	return events
 }
 
 // there's only 1 form so this selector is fine
@@ -95,9 +142,13 @@ $("form").on("submit", () => {
 
 	// if the username is loaded, but the competition isn't, don't make a request
 	// maybe popup some message?
-	if (user_data.selected_competition != -1)
+	if (user_data.selected_competition.code)
 		fetch_competition(user_data)
-			.then(display)
+			.then(events => 
+				fetch_scores(user_data).then(scores => 
+					display(associate_scores(events, scores))
+				)
+			)
 
 	return false // prevents the page from reloading
 })
@@ -105,8 +156,15 @@ $("form").on("submit", () => {
 // fetches the selected competition and fills the table
 $("#competitions").on("change", () => {
 	const index = $("#competitions").prop("selectedIndex")
-	user_data.selected_competition = supported_competitions[index].code
+	user_data.selected_competition = supported_competitions[index]
 
 	fetch_competition(user_data)
-		.then(display)
+		.then(events => {
+			if (user_data.name)
+				fetch_scores(user_data).then(scores =>
+					display(associate_scores(events, scores))
+				)
+			else
+				display(events)
+		})
 })
