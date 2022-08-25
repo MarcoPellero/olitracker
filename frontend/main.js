@@ -44,19 +44,27 @@ const display = (events) => {
 
 		// each element of ev.tasks is a Task object (as defined in backend/misc.ts)
 		for (const task of ev.tasks) {
-			const task_elem = document.createElement("td")
-			task_elem.textContent = task.name
+			const cell = document.createElement("td")
+			const task_elem = document.createElement("div")
 
-			if (task.score == 100)
-				task_elem.classList.add("success")
-			else if (task.score == 0)
-				task_elem.classList.add("fail")
-			else if (task.score) { // ignore null (default score)
-				task_elem.classList.add("mixed")
-				// set --percentage-done CSS var to task.score
+			if (task.link)
+				task_elem.innerHTML = `<a href=${task.link}>${task.name}</a>`
+			else {
+				task_elem.textContent = task.name;
+				cell.classList.add("unavailable")
 			}
 
-			row_elem.append(task_elem)
+			if (task.score == 100)
+				cell.classList.add("success")
+			else if (task.score == 0)
+				cell.classList.add("fail")
+			else if (task.score) { // ignore null (default score)
+				cell.classList.add("mixed")
+				task_elem.style = `--percentage-done: ${task.score}%`
+			}
+
+			cell.append(task_elem)
+			row_elem.append(cell)
 		}
 
 		table_elem.append(row_elem)

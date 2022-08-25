@@ -3,14 +3,28 @@ table, tr, th, td {
 	border-collapse: collapse;
 }
 
-.fail {
+.unavailable div {
+	background-color: gray;
+}
+
+.fail div {
 	background-color: lightcoral;
 }
 
-.success {
+.success div {
 	background-color: greenyellow;
 }
 
-.mixed {
-	background-color: orange;
+.mixed div {
+	/* background: repeating-linear-gradient(
+		135deg,
+		gold,
+		gold 10px,
+		gold 10px,
+		gold 20px
+		) left  / var(--percentage-done) 100% no-repeat; */
+	
+	/* background: linear-gradient(toright, gold, var(--percentage-done), transparent 0%) */
+
+	background: gold
 }
