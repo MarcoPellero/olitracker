@@ -170,7 +170,7 @@ async function get_scores(username: string) {
 
 export const handler: misc.CompHandler = {
 	code: "oii",
-	name: "nationals",
+	name: "OII",
 	get_tasks: (data: misc.ApiQuery) => get_comps(), // uncached
 	get_scores: (data: misc.ApiQuery) => {
 		if (data.user === undefined)

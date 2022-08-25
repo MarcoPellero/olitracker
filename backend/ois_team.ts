@@ -187,9 +187,10 @@ export const handler: misc.CompHandler = {
 	},
 	get_scores: oii.handler.get_scores,
 	get_sub_competitions: () => {
-		const rounds: misc.CompetitionInfo[] = [{code: "ois", name: "OIS Finals", round: "final"}]
+		const rounds: misc.CompetitionInfo[] = []
 		for (let i = 1; i < 5; i++)
 			rounds.push({code: `ois`, name: `OIS Round ${i}`, round: i})
+		rounds.push({code: "ois", name: "OIS Finals", round: "final"})
 		
 		return rounds
 	}
