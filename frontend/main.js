@@ -126,11 +126,18 @@ const fetch_scores = async (req_data) => {
 }
 
 const associate_scores = (events, scores) => {
-	for (const ev of events)
-		for (const task of ev.tasks)
-			task.score = scores[task.name] || null
+	const events_copy = events.map(ev => ({
+		year: ev.year,
+		tasks: ev.tasks.map(task => ({
+			name: task.name,
+			link: task.link,
+			id: task.id,
+			max_score_possible: task.max_score_possible,
+			score: scores[task.name] || null
+		}))
+	}))
 	
-	return events
+	return events_copy
 }
 
 // there's only 1 form so this selector is fine
@@ -147,7 +154,7 @@ $("form").on("submit", () => {
 			.then(events => 
 				fetch_scores(user_data).then(scores => 
 					display(associate_scores(events, scores))
-				)
+				).catch(() => display(events))
 			)
 
 	return false // prevents the page from reloading
