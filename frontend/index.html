@@ -1,28 +1,26 @@
 <html>
 
 <head>
-	<link rel="stylesheet" href="style.css">
-	
-	<script>let exports = {};</script> <!-- https://stackoverflow.com/questions/43042889/typescript-referenceerror-exports-is-not-defined -->
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-	<script defer type="module" src="main.js"></script>
-
 	<title>OliTracker</title>
 	<link rel="icon" href="static/foglietto.png">
+	<link rel="stylesheet" href="style.css">
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+	<script defer src="main.js"></script>
 </head>
 
 <body>
-	<form id="selectUser">
-		<input type="text" id="username" placeholder="User:">
-		<input type="submit" value="Lock in">
-	</form>
+	<div id = "LoginForm"> <!-- Section for selecting competitions & users -->
+		<form>
+			<input id="username" type="text" placeholder="User:">
+			<input type="submit" value="Select">
+		</form>
 
-	<div id="error">
-		<p>Error: Username not found</p>
-		<button onclick="$('#error').hide();">X</button>
+		<label for="competitions">Choose a competition</label>
+		<select id="competitions"></select> <!-- Populated thru JS -->
 	</div>
 
-	<table id="taskGrid"></table>
+	<table id="tasks"></table> <!-- Populated thru JS -->
 </body>
 
 </html>

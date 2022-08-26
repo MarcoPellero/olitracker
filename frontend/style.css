@@ -1,10 +1,19 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap');
-
-:root {
+:root{
 	--percentage-done: 0%;
 }
 
-table {
+#LoginForm {
+	position: relative;
+	margin: auto;
+	padding: 7px;
+	padding-bottom: 13px;
+
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 14px;
+}
+
+#tasks{
+	position: relative;
 	margin: auto;
 	border-collapse: collapse;
 }
@@ -24,8 +33,12 @@ td div {
 
 	background-color: white;
 	overflow: visible;
-	font-family: "Poppins-Regular", Arial, Helvetica, sans-serif;
+	font-family: Arial, Helvetica, sans-serif;
 	
+}
+
+th {
+	font-family: Arial, Helvetica, sans-serif;
 }
 
 td div:hover {
@@ -33,7 +46,7 @@ td div:hover {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
 
-.available a {
+.available div a {
 	display: block;
 
 	color: black;
@@ -42,68 +55,18 @@ td div:hover {
 }
 
 .unavailable div {
-	background: repeating-linear-gradient(
-		135deg,
-		gray,
-		gray 10px,
-		darkgray 10px,
-		darkgray 20px
-	);
-}
-
-.fullScore div {
-	background: repeating-linear-gradient(
-		135deg,
-		lightgreen,
-		lightgreen 10px,
-		greenyellow 10px,
-		greenyellow 20px
-	);
+	background-color: gray;
 }
 
 .fail div {
-	background: repeating-linear-gradient(
-		135deg,
-		lightcoral,
-		lightcoral 10px,
-		indianred 10px,
-		indianred 20px
-	);
+	background-color: lightcoral;
 }
 
-.somePoints div {
-	background: repeating-linear-gradient(
-		135deg,
-		gold,
-		gold 10px,
-		orange 10px,
-		orange 20px
-		) left  / var(--percentage-done) 100% no-repeat;
+.success div {
+	background-color: greenyellow;
 }
 
-#error {
-	position: absolute;
-
-	display: none; /* initially hidden; shown by JS */
-	width: 100px;
-	height: 50px;
-	padding-right: 20px;
-	padding-bottom: 20px;
-	padding-left: 10px;
-	padding-top: 8px;
-	background: rgba(255, 55, 10, 0.811);
-
-	border-radius: 10px;
-	border: 3px solid rgb(255, 55, 10);
-
-	white-space: initial;
-	word-wrap: break-word;
-
-	font-size:13px;
-	font-family:Arial, Helvetica, sans-serif;
-	color:rgba(0, 0, 0, 0.8)
+.mixed div {
+	background: linear-gradient(to right, gold var(--percentage-done), transparent 0%);
 }
 
-#error label {
-	font-size: 14px;
-}
