@@ -1,6 +1,57 @@
-table, tr, th, td {
-	border: 1px solid black;
+:root{
+	--percentage-done: 0%;
+}
+
+#LoginForm {
+	position: relative;
+	margin: auto;
+	padding: 7px;
+	padding-bottom: 13px;
+
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 14px;
+}
+
+#tasks{
+	position: relative;
+	margin: auto;
 	border-collapse: collapse;
+}
+
+td div {
+	line-height: 20px;
+
+	margin:auto;
+	border-radius: 25px;
+  	border: 1px solid black;
+
+	padding-left: 2px;
+	padding-right: 2px;
+
+	text-align: center;
+	font-size: 15px;
+
+	background-color: white;
+	overflow: visible;
+	font-family: Arial, Helvetica, sans-serif;
+	
+}
+
+th {
+	font-family: Arial, Helvetica, sans-serif;
+}
+
+td div:hover {
+	transform: scale(1.1);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.available div a {
+	display: block;
+
+	color: black;
+	text-decoration: none;
+
 }
 
 .unavailable div {
@@ -16,15 +67,6 @@ table, tr, th, td {
 }
 
 .mixed div {
-	/* background: repeating-linear-gradient(
-		135deg,
-		gold,
-		gold 10px,
-		gold 10px,
-		gold 20px
-		) left  / var(--percentage-done) 100% no-repeat; */
-	
-	/* background: linear-gradient(toright, gold, var(--percentage-done), transparent 0%) */
-
-	background: gold
+	background: linear-gradient(to right, gold var(--percentage-done), transparent 0%);
 }
+
