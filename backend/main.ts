@@ -33,23 +33,22 @@ app.get("/api/tasks", (req, res) => {
 	const req_id = unique_req_id++;
 
 	const data: misc.ApiQuery = req.query as unknown as misc.ApiQuery
-	console.log(`[${req_id}] GET /api/tasks query:`, data)
+	console.log(`[${misc.log_time()}] [${req_id}] GET /api/tasks query:`, data)
 
 	const handler = handlers[data.comp]
 	if (handler === undefined) {
-		console.log(`[${req_id}] GET /api/tasks => 400 Invalid competition`)
+		console.log(`[${misc.log_time()}] [${req_id}] GET /api/tasks => 400 Invalid competition`)
 		res.status(400).send("Invalid competition")
 		return
 	} else if (handler.has_sub_competitions && data.round === undefined) {
-		console.log(`[${req_id}] GET /api/tasks => 400 No round selected`)
+		console.log(`[${misc.log_time()}] [${req_id}] GET /api/tasks => 400 No round selected`)
 		res.status(400).send("No round selected")
 		return
 	}
 
 	const last_cache = handlers_cache[misc.cache_token(handler.code, data.round)]
-	console.log(last_cache)
 	if (Date.now() - last_cache.timer < handler.cache_max_age) {
-		console.log(`[${req_id}] GET /api/tasks => 200 Cache HIT`)
+		console.log(`[${misc.log_time()}] [${req_id}] GET /api/tasks => 200 Cache HIT`)
 		res.json(last_cache.data)
 		return
 	}
@@ -60,11 +59,11 @@ app.get("/api/tasks", (req, res) => {
 				timer: Date.now(),
 				data: events
 			}
-			console.log(`[${req_id}] GET /api/tasks => 200 Cache MISS`)
+			console.log(`[${misc.log_time()}] [${req_id}] GET /api/tasks => 200 Cache MISS`)
 			res.json(events)
 		})
 		.catch(err => {
-			console.log(`[${req_id}] GET /api/tasks => 500 Internal error`)
+			console.log(`[${misc.log_time()}] [${req_id}] GET /api/tasks => 500 Internal error`)
 			res.status(500).send("Internal error probably caused by malformed request")
 			console.log(err)
 		})
@@ -74,22 +73,22 @@ app.get("/api/scores", (req, res) => {
 	const req_id = unique_req_id++;
 
 	const data: misc.ApiQuery = req.query as unknown as misc.ApiQuery
-	console.log(`[${req_id}] /api/scores query:`, data)
+	console.log(`[${misc.log_time()}] [${req_id}] /api/scores query:`, data)
 
 	const handler = handlers[data.comp]
 	if (handler === undefined) {
-		console.log(`[${req_id}] GET /api/scores => 400 Invalid competition`)
+		console.log(`[${misc.log_time()}] [${req_id}] GET /api/scores => 400 Invalid competition`)
 		res.status(400).send("Invalid competition")
 		return
 	}
 	
 	handler.get_scores(data)
 		.then(scores => {
-			console.log(`[${req_id}] GET /api/scores => 200`)
+			console.log(`[${misc.log_time()}] [${req_id}] GET /api/scores => 200`)
 			res.json(scores)
 		})
 		.catch(err => {
-			console.log(`[${req_id}] GET /api/scores => 500 Internal error`)
+			console.log(`[${misc.log_time()}] [${req_id}] GET /api/scores => 500 Internal error`)
 			res.status(500).send("Internal error probably caused by malformed request")
 			console.log(err)
 		})
@@ -97,7 +96,7 @@ app.get("/api/scores", (req, res) => {
 
 app.get("/api/list", (req, res) => {
 	const req_id = unique_req_id++;
-	console.log(`[${req_id}] /api/list`)
+	console.log(`[${misc.log_time()}] [${req_id}] /api/list`)
 
 	const competition_list: misc.CompetitionInfo[] = []
 	for (const code in handlers) {
@@ -107,7 +106,7 @@ app.get("/api/list", (req, res) => {
 			competition_list.push({code, name: handlers[code].name, round: undefined})
 	}
 	
-	console.log(`[${req_id}] GET /api/list => 200`)
+	console.log(`[${misc.log_time()}] [${req_id}] GET /api/list => 200`)
 	res.json(competition_list)
 })
 

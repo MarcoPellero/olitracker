@@ -55,3 +55,5 @@ export const range = (from: number, to: number, step: number = 1) => {
 	
 	return output
 }
+
+export const log_time = () => new Date().toLocaleString([], { hour12: false })
