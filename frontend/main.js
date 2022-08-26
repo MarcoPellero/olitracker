@@ -47,9 +47,10 @@ const display = (events) => {
 			const cell = document.createElement("td")
 			const task_elem = document.createElement("div")
 
-			if (task.link)
+			if (task.link) {
 				task_elem.innerHTML = `<a href=${task.link}>${task.name}</a>`
-			else {
+				cell.classList.add("available");
+			} else {
 				task_elem.textContent = task.name;
 				cell.classList.add("unavailable")
 			}
