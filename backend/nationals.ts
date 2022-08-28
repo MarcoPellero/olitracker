@@ -154,8 +154,7 @@ async function get_stats_id(): Promise<string> {
 get_stats_id.statsId = ""; // Value persists inside function like static in C/C++
 
 async function get_comps(): Promise<misc.Event[]> {
-	var statsId: string;
-	statsId = await get_stats_id();
+	const statsId: string = await get_stats_id();
 	if (!statsId) throw new Error("Could not fetch stats ID")
 	const url = (year: number) => `https://stats.olinfo.it/_next/data/${statsId}/contest/${year}.json`
 
