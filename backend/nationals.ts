@@ -124,8 +124,39 @@ const normalize_task = (task: StatsYearTask): misc.Task => ({
 	max_score_possible: task.max_score_possible,
 })
 
+async function fetch_stats_id(): Promise<string> {
+	// Regexp to find the script tag that has the compilation ID we need
+	const regExpScript = new RegExp("<script src=\\\"\\/_next\\/static\\/.{21}\\/_buildManifest.js\\\" defer=\\\"\\\"><\\/script>")
+	const regExpId = new RegExp("\\/.{21}\\/");
+	try {
+		const req = await axios.get('https://stats.olinfo.it/tasks/');
+		if (req.status != 200) throw Error("Unsuccessful request for id");
+		const data = req.data;
+		const matchScript = regExpScript.exec(data);
+		if (!matchScript) throw Error("Could not match regexp to find stats id");
+		const scriptTag = matchScript[0];
+		const matchId = regExpId.exec(scriptTag);
+		if (!matchId) throw Error(); //This should never happen but typescript is a bitch
+
+		return matchId[0].substring(1, 22);
+	} catch (err) {
+		console.error(err);
+		return "";
+	}
+}
+
+async function get_stats_id(): Promise<string> {
+	if (!get_stats_id.statsId) {
+		get_stats_id.statsId = await fetch_stats_id();
+	}
+	return get_stats_id.statsId;
+}
+get_stats_id.statsId = ""; // Value persists inside function like static in C/C++
+
 async function get_comps(): Promise<misc.Event[]> {
-	const statsId = "XBep9IDCqBxdgN3tlbD4B" // need to scrape it from stats's HTML in case it changes
+	var statsId: string;
+	statsId = await get_stats_id();
+	if (!statsId) throw new Error("Could not fetch stats ID")
 	const url = (year: number) => `https://stats.olinfo.it/_next/data/${statsId}/contest/${year}.json`
 
 	const years = misc.range(new Date().getFullYear(), 2000, -1)
