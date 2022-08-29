@@ -130,15 +130,20 @@ async function fetch_stats_id(): Promise<string> {
 	const regExpId = new RegExp("\\/.{21}\\/");
 	try {
 		const req = await axios.get('https://stats.olinfo.it/tasks/');
-		if (req.status != 200) throw Error("Unsuccessful request for id");
+		if (req.status != 200)
+			throw Error("Unsuccessful request for id");
+
 		const data = req.data;
 		const matchScript = regExpScript.exec(data);
-		if (!matchScript) throw Error("Could not match regexp to find stats id");
+		if (!matchScript)
+			throw Error("Could not match regexp to find stats id");
+
 		const scriptTag = matchScript[0];
 		const matchId = regExpId.exec(scriptTag);
-		if (!matchId) throw Error(); //This should never happen but typescript is a bitch
+		if (!matchId)
+			throw Error("Some Error @ale didn't describe in nationals/fetch_stats_id()"); // This should never happen but typescript is a bitch
 
-		return matchId[0].substring(1, 22);
+		return matchId[0].substring(1, 22); // is it ok for the size to be fixed?
 	} catch (err) {
 		console.error(err);
 		return "";
@@ -147,25 +152,23 @@ async function fetch_stats_id(): Promise<string> {
 
 async function get_comps(): Promise<misc.Event[]> {
 	const statsId: string = await fetch_stats_id();
-	if (!statsId) throw new Error("Could not fetch stats ID")
+	if (!statsId)
+		throw new Error("Could not fetch stats ID")
+
 	const url = (year: number) => `https://stats.olinfo.it/_next/data/${statsId}/contest/${year}.json`
-
 	const years = misc.range(new Date().getFullYear(), 2000, -1)
-	const res_arr = await Promise.allSettled(
+	const events: StatsYear[] = []
+
+	await Promise.allSettled(
 		years.map(y => axios.get(url(y)) )
-	)
+	).then(promises => promises.forEach(val => {
+		if (val.status == "fulfilled")
+			events.push(val.value.data.pageProps)
+	}))
 
-	const data_arr: StatsYear[] = []
-	for (const res of res_arr) {
-		if (res.status == "rejected")
-			continue
-		
-		data_arr.push(res.value.data.pageProps)
-	}
-
-	return data_arr.map(data => ({
-		year: data.year,
-		tasks: data.contest.tasks.map(normalize_task)
+	return events.map(ev => ({
+		year: ev.year,
+		tasks: ev.contest.tasks.map(normalize_task)
 	}))
 }
 
