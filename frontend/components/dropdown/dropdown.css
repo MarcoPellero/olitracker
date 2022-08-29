@@ -1,0 +1,60 @@
+@import url('http://fonts.cdnfonts.com/css/montserrat'); /* used for ALL of the text in the dropdown menu */
+
+/* the dropdown menu container itself */
+.dropdown {
+	/* this will make the container as wide as the biggest item */
+	/* other elements should all have the same width if unset, which is the whole container */
+	width: fit-content;
+}
+
+/* all of the elements (or containers?) of the .dropdown div */
+.dropdown > * {
+	background-color: #F9F9F9;
+	font-family: Montserrat;
+	font-size: 20px;
+}
+
+/* the title & the items *container* */
+.dropdown > .title, .dropdown > .items {
+	border-radius: 5px;
+	border: 0;
+	box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+}
+
+/* the items *container* */
+.dropdown > .items {
+	/* removes the <ul> bullet */
+	list-style-type: none;
+	/* the 'hidden' bullet still takes up space, so the padding has to be removed */
+	padding: 0;
+}
+
+/* the items themselves, not the container */
+.dropdown > .items > * {
+	/* separates each item with a gray line */
+	border-bottom: 1px solid #DADADA;
+}
+
+/* both to the items themselves, and to the title */
+.dropdown > .items > *, .dropdown > .title {
+	/* makes the containers bigger than the text, leaving some whitespace at the sides */
+	padding-left: 10px;
+	padding-right: 10px;
+	
+	padding-top: 5px;
+	padding-bottom: 5px;
+
+	/* when the title or an item is being hovered, change the cursor to the lil hand */
+	cursor: pointer;
+}
+
+/* the last item */
+.dropdown > .items > .last-item {
+	/* removes the separator line at the bottom of the last item, because there's nothing to separate */
+	border-bottom: none;
+}
+
+/* the dropdown menu item being hovered gets a cute background color */
+.dropdown > .items > li:hover {
+	background-color: #EFE2FF;
+}
