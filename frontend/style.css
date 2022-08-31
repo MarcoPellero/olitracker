@@ -1,72 +1,9 @@
-:root{
-	--percentage-done: 0%;
+table {
+	border-collapse: separate;
+	border-spacing: 0;
+	position: fixed;
+	margin-left: 20%;
+	top: 10%;
 }
 
-#LoginForm {
-	position: relative;
-	margin: auto;
-	padding: 7px;
-	padding-bottom: 13px;
-
-	font-family: Arial, Helvetica, sans-serif;
-	font-size: 14px;
-}
-
-#tasks{
-	position: relative;
-	margin: auto;
-	border-collapse: collapse;
-}
-
-td div {
-	line-height: 20px;
-
-	margin:auto;
-	border-radius: 25px;
-  	border: 1px solid black;
-
-	padding-left: 2px;
-	padding-right: 2px;
-
-	text-align: center;
-	font-size: 15px;
-
-	background-color: white;
-	overflow: visible;
-	font-family: Arial, Helvetica, sans-serif;
-	
-}
-
-th {
-	font-family: Arial, Helvetica, sans-serif;
-}
-
-td div:hover {
-	transform: scale(1.1);
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-}
-
-.available div a {
-	display: block;
-
-	color: black;
-	text-decoration: none;
-
-}
-
-.unavailable div {
-	background-color: gray;
-}
-
-.fail div {
-	background-color: lightcoral;
-}
-
-.success div {
-	background-color: greenyellow;
-}
-
-.mixed div {
-	background: linear-gradient(to right, gold var(--percentage-done), transparent 0%);
-}
-
+.dropdown {}
