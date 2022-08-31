@@ -42,6 +42,7 @@ function create_cell(task) {
 
 	const link = document.createElement("a")
 	link.textContent = task.name
+	link.href = task.link
 	cell.append(link)
 
 	cell.classList.add("score-" +
