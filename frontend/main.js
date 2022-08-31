@@ -9,25 +9,65 @@ api_wrapper = {
 				throw new Error("Fatal: couldn't fetch list of supported competitions")
 			}),
 	
-	competition_events: (comp_data) =>
-		axios.get(`/api/tasks?comp=${comp_data.code}&round=${comp_data.round}`, { timeout: api_wrapper.timeout })
-			.then(res => res.data)
+	competition_events: async (comp_data) => {
+		const cache_token = `${comp_data.code}--${comp_data.round}`
+		if (this.cache === undefined)
+			this.cache = {}
+		else if (this.cache[cache_token] !== undefined) {
+			console.info(`Cache HIT: ${cache_token}`)
+			return this.cache[cache_token]
+		}
+		
+		console.info(`Cache MISS: ${cache_token}`)
+		
+		return axios.get(`/api/tasks?comp=${comp_data.code}&round=${comp_data.round}`, { timeout: api_wrapper.timeout })
+			.then(res => {
+				this.cache[cache_token] = res.data
+				return res.data
+			})
 			.catch(() => {
 				// popup some warning box
 				throw new Error(`Warning: couldn't fetch data for ${comp_data.name}`)
-			}),
+			})
+	},
 	
-	user_scores: (comp_data, user, password) =>
-		axios.get(`/api/scores?comp=${comp_data.code}&round=${comp_data.round}&user=${user}&password=${password}`)
-			.then(res => res.data)
+	user_scores: async (comp_data, user, password) => {
+		const score_cache_lifetime = 60 * 1000 // 1 minute
+		const cache_token = `${comp_data.code}--${user}--${password}`
+
+		if (this.cache === undefined)
+			this.cache = {}
+
+		else if (this.cache[cache_token] !== undefined) {
+			const age = Date.now() - this.cache[cache_token].time
+			
+			if (age >= score_cache_lifetime) {
+				this.cache[cache_token] = undefined
+				console.info(`Cache EXPIRE: ${cache_token}`)
+			} else {
+				console.info(`Cache HIT: ${cache_token}`)
+				return this.cache[cache_token].data
+			}
+		} else
+			console.info(`Cache MISS: ${cache_token}`)
+
+		return axios.get(`/api/scores?comp=${comp_data.code}&user=${user}&password=${password}`)
+			.then(res => {
+				this.cache[cache_token] = {
+					time: Date.now(),
+					data: res.data
+				}
+				return this.cache[cache_token].data
+			})
 			.catch(() => {
 				// popup some warning box
 				throw new Error(`Warning: couldn't fetch scores for ${comp_data.name}, user: ${user}`)
 			})
+	}
 }
 
 async function spawn_competition(info, scores) {
-	const events = await api_wrapper.competition_events(info)
+	const events = structuredClone(await api_wrapper.competition_events(info))
 
 	if (scores !== undefined)
 		events.forEach(ev => ev.tasks.forEach(
@@ -76,6 +116,9 @@ async function startup() {
 		// maybe popup some message?
 	}
 
+	// scores of the last user that was loaded; for when you jump between competitions
+	let last_loaded_scores = undefined;
+
 	// populates the dropdown menu with all of the known supported competitions
 	const dropdown_menu = document.querySelector(".dropdown > .items")
 	competition_list.forEach((val, idx) => {
@@ -92,7 +135,7 @@ async function startup() {
 	document.querySelectorAll(".dropdown > .items > *")
 		.forEach((elem, idx) => elem.addEventListener("click", () => {
 			selected = competition_list[idx]
-			spawn_competition(selected)
+			spawn_competition(selected, last_loaded_scores)
 		}))
 	
 	// create an event listener for the user info form to select a user & spawn a competition with the user's scores
@@ -100,9 +143,17 @@ async function startup() {
 		.onsubmit = (event) => {
 			try {
 				const username = document.querySelector(".user_box > #username").value
-				api_wrapper.user_scores(selected, username, "").then(
-					scores => spawn_competition(selected, scores)
-				)
+
+				api_wrapper.user_scores(selected, username, "")
+				.then(scores => {
+						last_loaded_scores = scores
+						spawn_competition(selected, scores)
+					})
+				.catch(() => {
+					// if there's an error, or if the username is blank, remove all of the scores
+					last_loaded_scores = undefined
+					spawn_competition(selected)
+				})
 			} finally {
 				event.preventDefault() // whether or not an error happens the page reload is always avoided
 			}
