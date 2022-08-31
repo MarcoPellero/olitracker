@@ -3,24 +3,40 @@
 <head>
 	<title>OliTracker</title>
 	<link rel="icon" href="static/foglietto.png">
+
+	<!-- styling and scripting for HTML components -->
+		<!-- dropdown menu for selecting a competition -->
+		<link rel="stylesheet" href="components/dropdown/dropdown.css">
+		<script defer src="components/dropdown/dropdown.js"></script>
+
+		<!-- table for displaying tasks, with score-based styling -->
+		<link rel="stylesheet" href="components/table/table.css">
+		<script defer src="components/table/table.js"></script>
+
+	<!-- external dependencies -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.27.2/axios.min.js"></script>
+
+	<!-- additional styling -->
 	<link rel="stylesheet" href="style.css">
 
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+	<!-- wraps the components and talks to the API -->
 	<script defer src="main.js"></script>
 </head>
 
 <body>
-	<div id = "LoginForm"> <!-- Section for selecting competitions & users -->
-		<form>
-			<input id="username" type="text" placeholder="User:">
-			<input type="submit" value="Select">
-		</form>
+	<form class="user_box">
+		<input id="username" type="text" placeholder="Username">
+		<button type="submit">Show scores</button>
+	</form>
 
-		<label for="competitions">Choose a competition</label>
-		<select id="competitions"></select> <!-- Populated thru JS -->
+	<div class="dropdown">
+		<button class="title">Select an event</button>
+
+		<ul class="items">
+		</ul>
 	</div>
 
-	<table id="tasks"></table> <!-- Populated thru JS -->
+	<table></table>
 </body>
 
 </html>
