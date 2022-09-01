@@ -72,8 +72,8 @@ async function spawn_competition(info, scores) {
 	if (scores !== undefined)
 		events.forEach(ev => ev.tasks.forEach(
 			task => {
-				if (scores[task.name] !== undefined)
-					task.score = scores[task.name]
+				if (scores[task.id] !== undefined)
+					task.score = scores[task.id]
 			}
 		))
 	

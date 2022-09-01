@@ -113,6 +113,7 @@ interface Round  {
 	}[]
 }
 
+
 function get_info(): Promise<GeneralInfo> {
 	const url = "https://squadre.olinfo.it/json/edition.json"
 	return axios.get(url)
@@ -166,7 +167,7 @@ async function get_round(info: GeneralInfo, round: number | "final"): Promise<mi
 				name: task.name,
 				title: task.title,
 				link: `https://training.olinfo.it/#/task/ois_${task.name}/statement`,
-				id: `https://training.olinfo.it/#/task/ois_${task.name}/statement`,
+				id: `${handler.code}_${task.name}`,
 				score: null,
 				max_score_possible: 100
 			}))

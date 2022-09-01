@@ -117,8 +117,8 @@ interface trainingUser {
 }
 
 const normalize_task = (task: StatsYearTask): misc.Task => ({
-	name: task.name,
-	id: task.name,
+	name: task.name, // task name with no prefixes
+	id: task.link ? `${handler.code}_${task.name}` : null, // task name WITH PREFIX
 	link: task.link,
 	score: null,
 	max_score_possible: task.max_score_possible,
@@ -186,10 +186,8 @@ async function get_scores(username: string) {
 		throw new Error("Invalid user")
 	
 	const mapping: misc.ScoresMap = {}
-	for (const task of profile.scores) {
-		let chunks = task.name.split("_")
-		mapping[chunks[chunks.length-1]] = task.score
-	}
+	for (const task of profile.scores)
+		mapping[task.name] = task.score
 	return mapping
 }
 
