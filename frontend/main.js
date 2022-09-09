@@ -1,5 +1,5 @@
 api_wrapper = {
-	timeout: 500,
+	timeout: 1500,
 
 	competition_list: () =>
 		axios.get("/api/list", { timeout: api_wrapper.timeout })
