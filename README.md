@@ -1,7 +1,7 @@
 # oliTracker
 Simple "tool" to visualize your progress on tasks from previous Informatics Olympiads, to train yourself
 
-Both the API and the site are hosted at https://alenygam.olitracker.com
+Both the API and the site are hosted at https://olitracker.alenygam.com
 
 Thanks to alenygam for hosting the site for free during development, i plan to get a domain and host it myself once i'm satisfied with it
 
