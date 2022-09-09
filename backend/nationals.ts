@@ -118,7 +118,7 @@ interface trainingUser {
 
 const normalize_task = (task: StatsYearTask): misc.Task => ({
 	name: task.name, // task name with no prefixes
-	id: task.link ? `${handler.code}_${task.name}` : null, // task name WITH PREFIX
+	id: task.link ? task.link.split("/task/")[1].split("/")[0] : null, // task name WITH PREFIX
 	link: task.link,
 	score: null,
 	max_score_possible: task.max_score_possible,
