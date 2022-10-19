@@ -89,3 +89,7 @@ table > tr > td { width: 120px; }
 
 /* if there's multiple tables (ois) space them apart */
 table + table { margin-top: 30px; }
+
+table > tr > td > a {
+	display: block;
+}
