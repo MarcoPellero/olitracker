@@ -87,6 +87,9 @@ table > tr > td { width: 120px; }
 /* remove the outline that appears when you select the form input box */
 #username_form > input:focus { outline: none; }
 
+/* for some reason the cursor wasn't as it should've been */
+#username_form > button { cursor: pointer; }
+
 /* if there's multiple tables (ois) space them apart */
 table + table { margin-top: 30px; }
 
