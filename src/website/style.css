@@ -72,9 +72,10 @@ table > tr > td { width: 120px; }
 /* shape the text box, remove default styles, and make it look good */
 #username_form > input {
 	border: 1px solid var(--colorhunt-4);
+	border-radius: 15px 0 0 15px;
 	background-color: var(--colorhunt-3);
 	width: 135;
-	padding-left: 5px;
+	padding-left: 10px;
 	font-size: 15px;
 }
 
