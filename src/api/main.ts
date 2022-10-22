@@ -14,8 +14,18 @@ const cache: {competitions: db_types.Competitions[], contests: db_types.Contests
 	contests: [],
 	tasks: []
 }
+const log_ids = {
+	"site_load": 0,
+	"user": 0
+}
 
 const app = express()
+
+app.get("/", (req, res, next) => {
+	console.log(`[${log_ids.site_load++}] site load`)
+	next()
+})
+
 app.use(express.static("../website/"))
 
 app.get("/api/competitions", (req, res) => {
@@ -62,13 +72,15 @@ app.get("/api/tasks/:contest_id", (req, res) => {
 
 app.get("/api/scores/:username", async (req, res) => {
 	const profile = await scoring.fetch_profile(req.params.username)
-	if (profile.success !== 1)
+	if (profile.success !== 1) {
 		res.status(400).end()
-	else {
+		console.log(`[${log_ids.user++}] request for user <${req.params.username}> FAIL`)
+	} else {
 		const title_to_score: {[title: string]: number} = {}
 		for (const x of profile.scores)
 			title_to_score[x.name] = x.score
 		res.json(title_to_score)
+		console.log(`[${log_ids.user++}] request for user <${req.params.username}> SUCCESS`)
 	}
 })
 
