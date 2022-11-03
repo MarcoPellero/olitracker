@@ -6,7 +6,6 @@ import * as db_types from "./../db_types"
 import * as scoring from "./scoring"
 
 dotenv.config({path: __dirname + "/.env"})
-const database = mysql.createConnection(process.env.DATABASE_URL as string)
 
 const cache_lifetime = 15 * 60 * 1000 // 15 minutes in milliseconds
 const cache: {competitions: db_types.Competitions[], contests: db_types.Contests[], tasks: db_types.Tasks[]} = {
@@ -29,11 +28,7 @@ app.get("/", (req, res, next) => {
 app.use(express.static("../website/"))
 
 app.get("/api/competitions", (req, res) => {
-	// database.query<db_types.Competitions[]>(
-	// 	"SELECT * FROM Competitions",
-	// 	(err, rows) => res.json(rows))
 	const rows = cache.competitions
-
 	res.json(rows)
 })
 
@@ -43,10 +38,6 @@ app.get("/api/contests/:competition_id", (req, res) => {
 		res.status(400).end()
 		return
 	}
-
-	// database.query<db_types.Contests[]>(
-	// 	`SELECT * FROM Contests WHERE competition_id=${sanitized_id} ORDER BY year DESC`,
-	// 	(err, rows) => res.json(rows))
 	const rows = cache.contests
 	const filtered = rows.filter(x => x.competition_id == sanitized_id)
 	const ordered = [...filtered].sort((a, b) => b.year - a.year) // [...copied the array to avoid mutating the original]
@@ -60,10 +51,6 @@ app.get("/api/tasks/:contest_id", (req, res) => {
 		res.status(400).end()
 		return
 	}
-
-	// database.query<db_types.Tasks[]>(
-	// 	`SELECT * FROM Tasks WHERE contest_id=${sanitized_id}`,
-	// 	(err, rows) => res.json(rows))
 	const rows = cache.tasks
 	const filtered = rows.filter(x => x.contest_id == sanitized_id)
 
@@ -85,19 +72,36 @@ app.get("/api/scores/:username", async (req, res) => {
 })
 
 function cache_maintainer() {
+	// sometimes the DB server destroys the connection (not our fault!),
+	// but if we open a new one each time then it should be able to re-query in 15 minutes, instead of killing the server
+	const database = mysql.createConnection(process.env.DATABASE_URL as string)
 	console.log("Updating cache..")
 
-	database.query<db_types.Competitions[]>(
-		"SELECT * FROM Competitions",
-		(err, rows) => cache.competitions = rows)
-	
-	database.query<db_types.Contests[]>(
-		"SELECT * FROM Contests",
-		(err, rows) => cache.contests = rows)
-	
-	database.query<db_types.Tasks[]>(
-		"SELECT * FROM Tasks",
-		(err, rows) => cache.tasks = rows)
+	try {
+		database.query<db_types.Competitions[]>(
+			"SELECT * FROM Competitions",
+			(err, rows) => {
+				if (err) console.log(err)
+				else cache.competitions = rows
+			})
+		
+		database.query<db_types.Contests[]>(
+			"SELECT * FROM Contests",
+			(err, rows) => {
+				if (err) console.log(err)
+				else cache.contests = rows
+			})
+		
+		database.query<db_types.Tasks[]>(
+			"SELECT * FROM Tasks",
+			(err, rows) => {
+				if (err) console.log(err)
+				else cache.tasks = rows
+			})
+	} catch (err) {
+		console.log("An error occurred while trying to query the DB")
+		console.error(err)
+	}
 	
 	console.log("Cache updated")
 	setTimeout(cache_maintainer, cache_lifetime);
