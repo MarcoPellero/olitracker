@@ -14,23 +14,28 @@ interface EditionExtended extends ois_types.RoundSpecific {
 	contest_title: string // THIS IS DIFFERENT FROM JUST TITLE!! 'round1' VS 'OIS2013ROUND1'
 }
 
-async function fetch_contests(): Promise<EditionExtended[]> {
+async function fetch_contests(comp_data: db_types.Competitions): Promise<EditionExtended[]> {
 	const generic_url = "https://squadre.olinfo.it/json/edition.json"
 	const generic_data: ois_types.EditionGeneric = await axios.get(generic_url).then(res => res.data)
 
-	const round_requests = generic_data.editions.map(
+	const launch_round_requests = () => generic_data.editions.map(
 		x => axios.get(`https://squadre.olinfo.it/json/edition.${x.id}.json`)
 	)
-	const final_requests = generic_data.editions.map(
+	const launch_final_requests = () => generic_data.editions.map(
 		x => axios.get(`https://squadre.olinfo.it/json/edition.${x.id}.round.final.json`)
 	)
 
-	const round_data = (await Promise.allSettled(round_requests))
+	const round_data = (await Promise.allSettled(launch_round_requests()))
 		.filter(pr => pr.status === "fulfilled")
 		.map(pr => (pr as PromiseFulfilledResult<AxiosResponse>).value.data as ois_types.EditionSpecific)
-	const final_data = (await Promise.allSettled(final_requests))
+	const final_data = (await Promise.allSettled(launch_final_requests()))
 		.filter(pr => pr.status === "fulfilled")
 		.map(pr => (pr as PromiseFulfilledResult<AxiosResponse>).value.data)
+	
+	let first_ed = 10000
+	for (const x of final_data)
+		if (x.ed_num < first_ed)
+			first_ed = x.ed_num
 	
 	// just add each final round into its relative edition
 	final_data.forEach((x, idx) => {
@@ -40,14 +45,18 @@ async function fetch_contests(): Promise<EditionExtended[]> {
 			title: "Round 5",
 			fullscore: x.fullscore,
 			tasks: x.tasks,
-			year: x.year // for some reason even if it's a number it still passes that .split()[0]
+			year: comp_data.first_year + x.ed_num - first_ed
 		}
 
-		round_data[idx].contests.push(value_mapping)
+		round_data[idx + (final_data.length == (round_data.length - 1) ? 1 : 0)].contests.push(value_mapping)
 	})
-	
+
 	// flatten out into the single rounds
 	const contests = round_data
+		.map(ed => {
+			ed.contests = ed.contests.filter(x => x.tasks !== null)
+			return ed
+		})
 		.map(ed => ed.contests.map(x => {
 			const copy = x as EditionExtended
 			copy.year = Number(ed.year.split('/')[0])
@@ -66,10 +75,11 @@ async function main() {
 	const [stored_contests] = await database.query<db_types.Contests[]>(`SELECT * FROM Contests WHERE competition_id='${competition_data.id}'`)
 
 	// differently from OII, to be able to pick single rounds, i'll make a 2d matrix: [[all rounds from y2012], [all rounds from y2013], etc]
-	const raw_rounds = await fetch_contests()
-	const official_contests = Array.from({length: new Date().getFullYear() - competition_data.first_year}, (x, idx) => {
+	const raw_rounds = await fetch_contests(competition_data)
+	const official_contests = Array.from({length: new Date().getFullYear() - competition_data.first_year + 1}, (x, idx) => {
 		const year = competition_data.first_year + idx
-		return raw_rounds.filter(x => x.year === year)
+		// finals are counted as the year after the rounds because.. well.. they are!
+		return raw_rounds.filter(x => (x.year === year && Number(x.id) !== 5) || (x.year === year+1 && Number(x.id) === 5))
 	})
 
 	// this process is mostly the same as it was for OII, i won't comment the same things
@@ -78,12 +88,15 @@ async function main() {
 	for (const contest of stored_contests) {
 		// the reason why all the rounds are -1'd is because they're 1based
 		const newer = official_contests[contest.year - competition_data.first_year][contest.round - 1]
-		
-		if (contest.num_of_tasks !== newer.tasks.length)
-			database.query(`UPDATE Contests SET num_of_tasks=${newer.tasks.length} WHERE id=${contest.id}`)
-		
-		if (contest.title !== newer.contest_title)
-			database.query(`UPDATE Contests SET title='${newer.contest_title}' WHERE id=${contest.id}`)
+
+		// if not all of the rounds have been published yet, the non-publishes ones will be UNDEFINED! this prevents a fatal crash
+		if (newer !== undefined) {
+			if (contest.num_of_tasks !== newer.tasks.length)
+				database.query(`UPDATE Contests SET num_of_tasks=${newer.tasks.length} WHERE id=${contest.id}`)
+
+			if (contest.title !== newer.contest_title)
+				database.query(`UPDATE Contests SET title='${newer.contest_title}' WHERE id=${contest.id}`)
+		}
 		
 		// i don't check if the links are up-to-date because i have nowhere to check them against, i can only generate them manually, so they won't change
 		// they're always <ois_${task_name}>
