@@ -35,7 +35,7 @@ pub struct EditionOverview {
 	#[serde(rename="tasks")]
 	pub total_tasks: u32,
 	#[serde(rename="instnum")]
-	pub _instnum: u32,
+	pub total_schools: u32,
 	#[serde(rename="lastEd")]
 	pub last_edition: u32, // this is the LAST edition, not the previous one
 	#[serde(rename="id")]
@@ -48,18 +48,18 @@ pub struct CompetitionOverview {
 	#[serde(rename="allreg")]
 	pub _all_reg: u32,
 	#[serde(rename="avgreg")]
-	pub _avg_reg: f64,
+	pub average_regions: f64, // the average number of regions partecipating in any edition
 	pub editions: Vec<EditionOverview>,
 	#[serde(rename="regions")]
-	pub _regions: u32,
+	pub total_regions: u32, // well unless new regions are created this should cap at 21
 	#[serde(rename="instnum")]
-	pub _instnum: u32,
+	pub total_schools: u32, // i don't think this is UNIQUE schools
 	#[serde(rename="teams")]
-	pub _teams: u32,
+	pub total_teams: u32,
 	#[serde(rename="points")]
-	pub _points: u32,
+	pub total_points: u32,
 	#[serde(rename="tasks")]
-	pub _tasks: u32
+	pub total_tasks: u32
 }
 
 pub async fn get_competition_overview() -> Result<CompetitionOverview, String> {
