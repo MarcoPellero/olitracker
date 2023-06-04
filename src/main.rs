@@ -1,7 +1,7 @@
-	mod oii;
+mod oii;
+mod ois;
 
-#[tokio::main]
-async fn main() {
+async fn print_oii_overview() {
 	let dump = match oii::get_contests().await {
 		Ok(v) => v,
 		Err(e) => panic!("{}", e)
@@ -18,4 +18,20 @@ async fn main() {
 			println!("\tTask {}: {}", task.index, task.name);
 		}
 	}
+}
+
+async fn print_ois_overview() {
+	let dump = match ois::get_competition_overview().await {
+		Ok(v) => v,
+		Err(e) => panic!("{}", e)
+	};
+
+	for ed in dump.editions {
+		println!("{}", ed.str_id);
+	}
+}
+
+#[tokio::main]
+async fn main() {
+	print_ois_overview().await;
 }
