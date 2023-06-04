@@ -63,7 +63,7 @@ pub struct CompetitionOverview {
 }
 
 pub async fn get_competition_overview() -> Result<CompetitionOverview, String> {
-	let url = "https://squadre.olinfo.it/json/edition.json";
+	let url = "https://raw.githubusercontent.com/olinfo/squadre/master/json/edition.json";
 	
 	let resp = match reqwest::get(url).await {
 		Ok(v) => v,
