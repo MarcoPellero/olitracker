@@ -71,20 +71,19 @@ async fn print_oii_overview() {
 }
 
 async fn print_ois_overview() {
-	let dump = match ois::get_competition_overview().await {
+	let dump = match ois::get_competition_info().await {
 		Ok(v) => v,
 		Err(e) => panic!("{}", e)
 	};
 
 	for ed in dump.editions {
-		println!("{}", ed.str_id);
+		println!("{}", ed.id_str);
 	}
 }
 
 #[tokio::main]
 async fn main() {
-	let contests = match oii::get_contests().await {
-		Ok(v) => oii_normalize(v),
-		Err(e) => panic!("{}", e)
-	};
+	// let oii_comp = oii_normalize(oii::get_contests().await.unwrap());
+
+	let ed = ois::get_edition(10).await.unwrap();
 }
