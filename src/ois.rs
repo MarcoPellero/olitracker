@@ -64,7 +64,15 @@ pub struct CompetitionInfo {
 
 #[derive(Deserialize)]
 pub struct Task {
+	#[serde(deserialize_with="task_name_serializer")]
 	pub name: String,
+	/*
+	in ois11, there was a task named "23".
+	now, you'd think the API would give back "23", but no.
+	it's coded in javascript, so of fucking course it gives back the literal integer 23.
+	and that fucking crashes this code if i don't use a custom deserializer.
+	I HATE JAVASCRIPT AASDFASDASDF
+	*/
 	pub title: String
 }
 
@@ -169,7 +177,23 @@ pub struct Edition {
 	pub last_edition: u32
 }
 
-pub async fn get_competition_info() -> Result<CompetitionInfo, String> {
+// to understand why this exists, refer to Task's definition
+// TLDR: fuck javascript
+// PS: i stole this code from a mix of a blog post and chatgpt
+fn task_name_serializer<'de, D>(deserializer: D) -> Result<String, D::Error>
+where
+    D: serde::de::Deserializer<'de>,
+{
+    let value: serde_json::Value = Deserialize::deserialize(deserializer)?;
+
+    return match value {
+        serde_json::Value::String(s) => Ok(s),
+        serde_json::Value::Number(n) => Ok(n.to_string()),
+        _ => Err(serde::de::Error::custom("Invalid name value")),
+    };
+}
+
+pub async fn get_info() -> Result<CompetitionInfo, String> {
 	let url = "https://raw.githubusercontent.com/olinfo/squadre/master/json/edition.json";
 	
 	let resp = match reqwest::get(url).await {
