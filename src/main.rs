@@ -1,3 +1,6 @@
+use std::{cmp::min, cmp::max};
+use futures::{future::*, join};
+
 mod oii;
 mod ois;
 
@@ -16,7 +19,7 @@ struct Competition {
 	name: String
 }
 
-fn oii_normalize(contests: Vec<oii::Contest>) -> Competition {
+fn oii_normalize(contests: &Vec<oii::Contest>) -> Competition {
 	let mut comp = Competition {
 		name: "oii".to_string(),
 		task_groups: Vec::new()
@@ -28,15 +31,15 @@ fn oii_normalize(contests: Vec<oii::Contest>) -> Competition {
 			tasks: Vec::new()
 		};
 
-		for task in contest.tasks {
+		for task in contest.tasks.iter() {
 			if task.link.is_none() {
 				println!("warning: oii{} task '{}' does not have a link and has therefore been skipped", contest.year, task.name);
 				continue;
 			}
 
 			group.tasks.push(Task {
-				name: task.name,
-				link: task.link.expect("The task to have a link")
+				name: task.name.clone(),
+				link: task.link.clone().expect("The task to have a link")
 			});
 		}
 
@@ -51,39 +54,64 @@ fn oii_normalize(contests: Vec<oii::Contest>) -> Competition {
 	return comp;
 }
 
-async fn print_oii_overview() {
-	let dump = match oii::get_contests().await {
-		Ok(v) => v,
-		Err(e) => panic!("{}", e)
-	};
+fn ois_normalize(editions: &Vec<&ois::Edition>) -> Vec<Competition> {
+	let mut comps = Vec::new();
+	// i don't wanna hard-code the number of rounds :(
+	// it starts out with no rounds, and for each competition, i'll add them as i go
+	
+	for ed in editions {
+		let year_str = ed.year_str.split('/').next().unwrap(); // 2022/23 -> 2022
 
-	for contest in dump {
-		println!("OII{} had {} tasks and {} contestants; It was held in {}",
-			contest.year,
-			contest.tasks.len(),
-			contest.contestants,
-			contest.region.unwrap_or("N/A".to_string()));
-		
-		for task in contest.tasks {
-			println!("\tTask {}: {}", task.index, task.name);
+		for (i, round) in ed.rounds.iter().enumerate() {
+			if i >= comps.len() {
+				comps.push(Competition {
+					task_groups: Vec::new(),
+					name: format!("ois{}", i+1)
+				});
+			}
+
+			let group = TaskGroup {
+				id: year_str.to_string(),
+				tasks: round.tasks
+					.iter()
+					.map(|t| Task {
+						name: t.name.clone(),
+						link: format!("https://training.olinfo.it/#/task/ois_{}", t.name)
+					})
+					.collect()
+			};
+
+			comps[i].task_groups.push(group);
 		}
 	}
-}
 
-async fn print_ois_overview() {
-	let dump = match ois::get_competition_info().await {
-		Ok(v) => v,
-		Err(e) => panic!("{}", e)
-	};
-
-	for ed in dump.editions {
-		println!("{}", ed.id_str);
-	}
+	return comps;
 }
 
 #[tokio::main]
 async fn main() {
-	// let oii_comp = oii_normalize(oii::get_contests().await.unwrap());
+	let info = ois::get_info().await.unwrap();
+	println!("{} Editions", info.editions.len());
 
-	let ed = ois::get_edition(10).await.unwrap();
+	let ed_resps = join_all(
+		info.editions
+		.iter()
+		.map(|ed| ois::get_edition(ed.num_id))
+	).await;
+	
+	let eds: Vec<&ois::Edition> = ed_resps
+		.iter()
+		.map(|ed| ed.as_ref().unwrap())
+		.collect();
+
+	let comps = ois_normalize(&eds);
+	for comp in comps {
+		println!("Competition: {}", comp.name);
+		for group in comp.task_groups {
+			println!("\tTask group: {}", group.id);
+			for task in group.tasks {
+				println!("\t\tTask name: {}", task.name);
+			}
+		}
+	}
 }
