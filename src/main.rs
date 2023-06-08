@@ -4,16 +4,19 @@ use futures::{future::*, join};
 mod oii;
 mod ois;
 
+#[derive(Debug)]
 struct Task {
 	name: String,
 	link: String
 }
 
+#[derive(Debug)]
 struct TaskGroup {
 	tasks: Vec<Task>,
 	id: String // for OII this'd be just the year, "2022", but for OIS, it could be "2022/1", year/round
 }
 
+#[derive(Debug)]
 struct Competition {
 	task_groups: Vec<TaskGroup>,
 	name: String
@@ -105,13 +108,7 @@ async fn main() {
 		.collect();
 
 	let comps = ois_normalize(&eds);
-	for comp in comps {
-		println!("Competition: {}", comp.name);
-		for group in comp.task_groups {
-			println!("\tTask group: {}", group.id);
-			for task in group.tasks {
-				println!("\t\tTask name: {}", task.name);
-			}
-		}
-	}
+
+	let round = ois::get_round(12, "final").await.unwrap();
+	println!("Round: {:?}", round);
 }

@@ -1,7 +1,7 @@
 use reqwest;
 use serde::Deserialize;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct Highlight {
 	pub id: String,
 	#[serde(rename="name")]
@@ -9,7 +9,7 @@ pub struct Highlight {
 	pub description: String
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct EditionInfo {
 	#[serde(rename="name")]
 	pub id_str: String,
@@ -42,7 +42,7 @@ pub struct EditionInfo {
 	pub num_id: u32
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct CompetitionInfo {
 	pub highlights: Vec<Highlight>,
 	#[serde(rename="allreg")]
@@ -62,7 +62,7 @@ pub struct CompetitionInfo {
 	pub total_tasks: u32
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct Task {
 	#[serde(deserialize_with="task_name_serializer")]
 	pub name: String,
@@ -76,7 +76,7 @@ pub struct Task {
 	pub title: String
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct Round {
 	#[serde(rename="id")]
 	pub index_str: String, // like "1"
@@ -88,7 +88,7 @@ pub struct Round {
 	pub tasks: Vec<Task>
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct Team {
 	pub id: String,
 	pub name: String,
@@ -104,7 +104,7 @@ pub struct Team {
 	pub is_finalist: bool
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct FinalsLeaderboard {
 	pub rank: u32,
 	#[serde(rename="rank_reg")]
@@ -115,12 +115,12 @@ pub struct FinalsLeaderboard {
 	pub team: Team
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct _FinalsLeaderboard_Wrapper {
 	pub ranking: Vec<FinalsLeaderboard>
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct GlobalLeaderboard {
 	#[serde(rename="rank_reg")]
 	pub regional_rank: u32,
@@ -135,7 +135,7 @@ pub struct GlobalLeaderboard {
 	pub team: Team
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct Edition {
 	pub highlights: Vec<Highlight>,
 	#[serde(rename="id")]
@@ -177,20 +177,54 @@ pub struct Edition {
 	pub last_edition: u32
 }
 
+#[derive(Deserialize, Debug)]
+pub struct RoundInfo {
+	pub highlights: Vec<Highlight>,
+	#[serde(rename="id")]
+	pub id_str: String,
+	pub name: String,
+	pub title: String,
+	#[serde(rename="teams")]
+	pub total_teams: u32,
+	#[serde(rename="points")]
+	pub total_points: u32,
+	#[serde(rename="fullscore")]
+	pub score_ceiling: u32,
+	#[serde(rename="positive")]
+	pub _positive: u32,
+	#[serde(rename="highest")]
+	pub high_score: u32,
+	#[serde(rename="average")]
+	pub average_score: f64,
+	#[serde(rename="avgpos")]
+	pub average_rank: f64,
+	#[serde(rename="medpos")]
+	pub _medpos: u32,
+	#[serde(rename="lastEd")]
+	pub last_edition: u32,
+	pub edition: String,
+	pub tasks: Vec<Task>,
+	#[serde(rename="lastRound")]
+	pub last_round: String, // can be a number ("3"), but also a string ("final")
+	pub ed_num: u32,
+	#[serde(rename="provisional")]
+	pub _provisional: bool
+}
+
 // to understand why this exists, refer to Task's definition
 // TLDR: fuck javascript
 // PS: i stole this code from a mix of a blog post and chatgpt
 fn task_name_serializer<'de, D>(deserializer: D) -> Result<String, D::Error>
 where
-    D: serde::de::Deserializer<'de>,
+	D: serde::de::Deserializer<'de>,
 {
-    let value: serde_json::Value = Deserialize::deserialize(deserializer)?;
+	let value: serde_json::Value = Deserialize::deserialize(deserializer)?;
 
-    return match value {
-        serde_json::Value::String(s) => Ok(s),
-        serde_json::Value::Number(n) => Ok(n.to_string()),
-        _ => Err(serde::de::Error::custom("Invalid name value")),
-    };
+	return match value {
+		serde_json::Value::String(s) => Ok(s),
+		serde_json::Value::Number(n) => Ok(n.to_string()),
+		_ => Err(serde::de::Error::custom("Invalid name value")),
+	};
 }
 
 pub async fn get_info() -> Result<CompetitionInfo, String> {
@@ -214,8 +248,8 @@ pub async fn get_info() -> Result<CompetitionInfo, String> {
 	return Ok(dump);
 }
 
-pub async fn get_edition(year: u32) -> Result<Edition, String> {
-	let url = format!("https://raw.githubusercontent.com/olinfo/squadre/master/json/edition.{}.json", year);
+pub async fn get_edition_rounds(ed_num: u32) -> Result<Edition, String> {
+	let url = format!("https://raw.githubusercontent.com/olinfo/squadre/master/json/edition.{}.json", ed_num);
 
 	let resp = match reqwest::get(url).await {
 		Ok(v) => v,
@@ -233,4 +267,31 @@ pub async fn get_edition(year: u32) -> Result<Edition, String> {
 	};
 
 	return Ok(dump);
+}
+
+pub async fn get_round(ed_num: u32, round: &str) -> Result<RoundInfo, String> {
+	// round is a string because it may be a number ("3") but it may refer to finals ("final")
+
+	let url = format!("https://raw.githubusercontent.com/olinfo/squadre/master/json/edition.{}.round.{}.json", ed_num, round);
+
+	let resp = match reqwest::get(url).await {
+		Ok(v) => v,
+		Err(e) => return Err(e.to_string())
+	};
+
+	let raw = match resp.text().await {
+		Ok(v) => v,
+		Err(e) => return Err(e.to_string())
+	};
+
+	let dump = match serde_json::from_str(&raw) {
+		Ok(v) => v,
+		Err(e) => return Err(e.to_string())
+	};
+
+	return Ok(dump);
+}
+
+pub async fn get_edition(ed_num: u32) -> Result<Edition, String> {
+	return get_edition_rounds(ed_num).await;
 }
