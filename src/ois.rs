@@ -101,7 +101,7 @@ pub struct Team {
 	#[serde(rename="fullregion")]
 	pub region_name: String,
 	#[serde(rename="finalist")]
-	pub is_finalist: bool
+	pub is_finalist: Option<bool>
 }
 
 #[derive(Deserialize, Debug)]
@@ -141,7 +141,7 @@ pub struct Edition {
 	#[serde(rename="id")]
 	pub num_id: u32,
 	#[serde(rename="final")]
-	pub finals_leaderboard: _FinalsLeaderboard_Wrapper,
+	pub finals_leaderboard: Option<_FinalsLeaderboard_Wrapper>,
 	#[serde(rename="rounds")]
 	pub global_leaderboard: Vec<GlobalLeaderboard>,
 	#[serde(rename="name")]
