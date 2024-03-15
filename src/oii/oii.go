@@ -45,6 +45,6 @@ func exportContests(contests []contest) types.Competition {
 	return comp
 }
 
-func Get() types.Competition {
-	return exportContests(getContests())
+func Get() []types.Competition {
+	return []types.Competition{exportContests(getContests())}
 }
