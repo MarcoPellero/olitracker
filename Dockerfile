@@ -6,7 +6,8 @@ COPY go.mod go.sum ./
 RUN go mod download && go mod verify
 
 COPY ./src ./src
-COPY ./website /var/www/
 RUN go build -v -o /usr/local/bin/app ./src
+
+COPY ./website /var/www/
 
 CMD ["app"]
