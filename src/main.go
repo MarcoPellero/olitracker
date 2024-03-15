@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"olitracker.it/src/oii"
 	"olitracker.it/src/ois"
+	"olitracker.it/src/profiles"
 )
 
 func main() {
@@ -21,6 +22,21 @@ func main() {
 
 	router.GET("/api/ois", func(c *gin.Context) {
 		c.JSON(http.StatusOK, ois.Get())
+	})
+
+	router.GET("/api/scores", func(c *gin.Context) {
+		username := c.Query("username")
+		if username == "" {
+			c.String(http.StatusBadRequest, "username is required")
+			return
+		}
+
+		p := profiles.Get(username)
+		if p.Success == 1 {
+			c.JSON(http.StatusOK, p)
+		} else {
+			c.String(http.StatusInternalServerError, *p.Error)
+		}
 	})
 
 	router.Run()
