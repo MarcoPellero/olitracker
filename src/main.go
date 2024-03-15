@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"olitracker.it/src/oii"
+	"olitracker.it/src/ois"
 )
 
 func main() {
@@ -14,10 +15,12 @@ func main() {
 	router.StaticFS("/assets/", http.Dir("/var/www"))
 
 	router.GET("/api/oii", func(c *gin.Context) {
-		/* this is crazy fast despite seemingly doing a network request,
-		   i think gin is caching the result of GetCompetition()
-		*/
-		c.JSON(http.StatusOK, oii.GetCompetition())
+		// this is really fast (ty github :3) but it could be a ddos vector; needs some caching
+		c.JSON(http.StatusOK, oii.Get())
+	})
+
+	router.GET("/api/ois", func(c *gin.Context) {
+		c.JSON(http.StatusOK, ois.Get())
 	})
 
 	router.Run()
