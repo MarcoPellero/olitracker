@@ -2,11 +2,11 @@ FROM golang:1.22
 
 WORKDIR /usr/src/app
 
-COPY go.mod go.sum .
+COPY go.mod go.sum ./
 RUN go mod download && go mod verify
 
-COPY ./src .
+COPY ./src ./src
 COPY ./website /var/www/
-RUN go build -v -o /usr/local/bin/app ./...
+RUN go build -v -o /usr/local/bin/app ./src
 
 CMD ["app"]
