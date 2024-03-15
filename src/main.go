@@ -11,6 +11,7 @@ func main() {
 	router := gin.Default()
 
 	router.StaticFile("/", "/var/www/index.html")
+	router.StaticFS("/assets/", http.Dir("/var/www"))
 
 	router.GET("/api/oii", func(c *gin.Context) {
 		/* this is crazy fast despite seemingly doing a network request,
