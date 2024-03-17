@@ -30,3 +30,11 @@ func Get(username string) Profile {
 
 	return profile
 }
+
+func ExportScores(p Profile) map[string]int {
+	scores := make(map[string]int)
+	for _, s := range *p.Scores {
+		scores[s.Name] = s.Score
+	}
+	return scores
+}
