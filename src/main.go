@@ -12,11 +12,11 @@ import (
 	"olitracker.it/src/types"
 )
 
-func NewCompHandler(router *gin.Engine, fn func() []types.Competition) func(*gin.Context) {
+func NewCompHandler(router *gin.Engine, fn func() types.Competition) func(*gin.Context) {
 	// returns a handler that accesses periodically refreshed data
 
 	updateInterval := 15 * time.Minute
-	data := []types.Competition{}
+	data := types.Competition{}
 	lock := &sync.RWMutex{}
 
 	go func() {
@@ -41,7 +41,7 @@ func main() {
 	router := gin.Default()
 
 	router.StaticFile("/", "/var/www/index.html")
-	router.StaticFS("/assets/", http.Dir("/var/www"))
+	router.StaticFS("/assets/", http.Dir("/var/www/"))
 
 	router.GET("/api/oii", NewCompHandler(router, oii.Get))
 	router.GET("/api/ois", NewCompHandler(router, ois.Get))

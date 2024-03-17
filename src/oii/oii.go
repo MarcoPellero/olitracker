@@ -7,7 +7,7 @@ import (
 	"olitracker.it/src/types"
 )
 
-func getContests() []contest {
+func getEditions() []edition {
 	res, err := http.Get("https://raw.githubusercontent.com/algorithm-ninja/oii-stats/master/data/contests.json")
 	if err != nil {
 		panic(err)
@@ -15,7 +15,7 @@ func getContests() []contest {
 	defer res.Body.Close()
 
 	var dump struct {
-		Contests []contest `json:"contests"`
+		Editions []edition `json:"contests"`
 	}
 
 	dec := json.NewDecoder(res.Body)
@@ -24,27 +24,38 @@ func getContests() []contest {
 		panic(err)
 	}
 
-	return dump.Contests
+	return dump.Editions
 }
 
-func exportContests(contests []contest) types.Competition {
-	var comp types.Competition
-	comp.Name = "OII"
-	comp.Contests = make([]types.Contest, len(contests))
+func exportEditions(editions []edition) types.Competition {
+	comp := types.Competition{
+		Name:     "OII",
+		Editions: make([]types.Edition, len(editions)),
+	}
 
-	for i, c := range contests {
-		comp.Contests[i].Year = c.Year
-		comp.Contests[i].Tasks = make([]types.Task, len(c.Tasks))
+	for i, inEd := range editions {
+		outEd := &comp.Editions[i]
+		*outEd = types.Edition{
+			Year:     inEd.Year,
+			Contests: make([]types.Contest, 1),
+		}
 
-		for j, t := range c.Tasks {
-			comp.Contests[i].Tasks[j].Name = t.Name
-			comp.Contests[i].Tasks[j].Link = t.Link
+		contest := &outEd.Contests[0]
+		*contest = types.Contest{
+			Tasks: make([]types.Task, len(inEd.Tasks)),
+		}
+
+		for j, t := range inEd.Tasks {
+			contest.Tasks[j] = types.Task{
+				Name: t.Name,
+				Link: t.Link,
+			}
 		}
 	}
 
 	return comp
 }
 
-func Get() []types.Competition {
-	return []types.Competition{exportContests(getContests())}
+func Get() types.Competition {
+	return exportEditions(getEditions())
 }

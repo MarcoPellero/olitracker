@@ -9,13 +9,19 @@ type Task struct {
 	Link *string `json:"link"`
 }
 
+// OII2019, OIS2019round1, OIS2019round2, etc
 type Contest struct {
-	Year  int    `json:"year"`
-	Round *int   `json:"round"` // oii doesn't have rounds; ois does
 	Tasks []Task `json:"tasks"`
 }
 
+// OII2019, OIS2019, etc
+type Edition struct {
+	Year     int       `json:"year"`
+	Contests []Contest `json:"contests"`
+}
+
+// OII and OIS
 type Competition struct {
 	Name     string    `json:"name"`
-	Contests []Contest `json:"contests"`
+	Editions []Edition `json:"editions"`
 }

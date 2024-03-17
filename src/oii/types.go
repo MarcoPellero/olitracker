@@ -27,7 +27,7 @@ type task struct {
 	ScoreCeiling *float32 `json:"max_score_possible"`
 }
 
-type contest struct {
+type edition struct {
 	Year         int              `json:"year"`
 	Nav          navigation       `json:"navigation"`
 	Place        location         `json:"location"`

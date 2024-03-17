@@ -86,35 +86,45 @@ func getEditions() []edition {
 	return editions
 }
 
-func exportEditions(eds []edition) []types.Competition {
-	comps := make([]types.Competition, len(eds))
+func exportEditions(inEds []edition) types.Competition {
+	comp := types.Competition{
+		Name:     "OIS",
+		Editions: make([]types.Edition, len(inEds)),
+	}
 
-	for i, ed := range eds {
+	for i, inEd := range inEds {
 		// "2014/15" -> 2014
-		year, err := strconv.Atoi(strings.Split(ed.YearStr, "/")[0])
+		year, err := strconv.Atoi(strings.Split(inEd.YearStr, "/")[0])
 		if err != nil {
 			panic(err)
 		}
 
-		comps[i].Name = fmt.Sprintf("OIS%d", ed.Id)
-		comps[i].Contests = make([]types.Contest, len(ed.Rounds))
+		outEd := &comp.Editions[i]
+		*outEd = types.Edition{
+			Year:     year,
+			Contests: make([]types.Contest, len(inEd.Rounds)),
+		}
 
-		for j, r := range ed.Rounds {
-			comps[i].Contests[j].Year = year
-			comps[i].Contests[j].Tasks = make([]types.Task, len(r.Tasks))
+		for j, r := range inEd.Rounds {
+			contest := &outEd.Contests[j]
+			*contest = types.Contest{
+				Tasks: make([]types.Task, len(r.Tasks)),
+			}
 
 			for k, t := range r.Tasks {
-				comps[i].Contests[j].Tasks[k].Name = t.Name
 				url := fmt.Sprintf("https://training.olinfo.it/#/task/ois_%s", t.Name)
-				comps[i].Contests[j].Tasks[k].Link = &url
+				contest.Tasks[k] = types.Task{
+					Name: t.Name,
+					Link: &url,
+				}
 			}
 
 		}
 	}
 
-	return comps
+	return comp
 }
 
-func Get() []types.Competition {
+func Get() types.Competition {
 	return exportEditions(getEditions())
 }
