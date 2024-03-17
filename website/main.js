@@ -2,7 +2,10 @@ const select	= document.querySelector("select");
 const form		= document.querySelector("form");
 const input		= form.querySelector("input");
 const tables_div	= document.querySelector("div");
+
 let competitions = [];
+let scores = {};
+let last_username = "";
 
 async function loadScores() {
 	const username = input.value;
@@ -10,8 +13,12 @@ async function loadScores() {
 		return;
 	}
 
-	const scores = await fetch(`/api/scores?username=${username}`)
-		.then(res => res.json());
+	if (username !== last_username) {
+		last_username = username;
+		scores = await fetch(`/api/scores?username=${username}`)
+			.then(res => res.json());
+	}
+	
 	console.log("Scores:", scores);
 
 	const comp_prefix = competitions[select.selectedIndex].name.toLowerCase() + "_";
