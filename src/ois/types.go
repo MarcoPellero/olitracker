@@ -1,12 +1,12 @@
 package ois
 
-type Highlight struct {
+type highlight struct {
 	Id          string `json:"id"`
 	Team        string `json:"name"`
 	Description string `json:"description"`
 }
 
-type Team struct {
+type team struct {
 	Id         string `json:"id"`
 	Name       string `json:"name"`
 	School     string `json:"institute"`
@@ -16,38 +16,38 @@ type Team struct {
 	Finalist   bool   `json:"finalist"`
 }
 
-type FinalsLeaderboard struct {
+type finalsLeaderboard struct {
 	Rank         int   `json:"rank"`
 	RegionalRank int   `json:"rank_reg"`
 	Scores       []int `json:"scores"`
 	TotalScore   int   `json:"total"`
-	Team         Team  `json:"team"`
+	Team         team  `json:"team"`
 }
 
-type GlobalLeaderboard struct {
+type globalLeaderboard struct {
 	Rank         int   `json:"rank_tot"`
 	RegionalRank int   `json:"rank_reg"`
 	RoundScores  []int `json:"rounds"`
 	TotalScore   int   `json:"total"`
-	Team         Team  `json:"team"`
+	Team         team  `json:"team"`
 	// i don't know what this represents
 	Unk_rank_excl int `json:"rank_excl"`
 }
 
-type Task struct {
+type task struct {
 	Name  string `json:"name"`
 	Title string `json:"title"`
 }
 
-type Round struct {
+type round struct {
 	Id           string `json:"id"`
 	Name         string `json:"name"`
 	Title        string `json:"title"`
 	ScoreCeiling int    `json:"fullscore"`
-	Tasks        []Task `json:"tasks"`
+	Tasks        []task `json:"tasks"`
 }
 
-type Edition struct {
+type edition struct {
 	Id                int         `json:"id"`
 	Name              string      `json:"name"`
 	Title             string      `json:"title"`
@@ -59,15 +59,15 @@ type Edition struct {
 	HighScore         int         `json:"highest"`
 	AverageScore      float32     `json:"average"`
 	AverageRank       float32     `json:"avgpos"`
-	Highlights        []Highlight `json:"highlights"`
+	Highlights        []highlight `json:"highlights"`
 	NumTasks          int         `json:"tasks"`
 	NumSchools        int         `json:"instnum"`
 	LastEdId          int         `json:"lastEd"`
 	FinalsLeaderboard *struct {
-		Ranking []FinalsLeaderboard `json:"ranking"`
+		Ranking []finalsLeaderboard `json:"ranking"`
 	} `json:"final"`
-	Rounds            []Round             `json:"contests"`
-	GlobalLeaderboard []GlobalLeaderboard `json:"rounds"`
+	Rounds            []round             `json:"contests"`
+	GlobalLeaderboard []globalLeaderboard `json:"rounds"`
 
 	// i don't know what these represent
 	Unk_positive int `json:"positive"`

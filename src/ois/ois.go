@@ -25,7 +25,7 @@ func lastEditionId() int {
 	return time.Now().Year() - firstYear + firstEditionId + 1
 }
 
-func getEdition(id int) (Edition, int) {
+func getEdition(id int) (edition, int) {
 	url := fmt.Sprintf("https://raw.githubusercontent.com/olinfo/squadre/master/json/edition.%d.json", id)
 	res, err := http.Get(url)
 	if err != nil {
@@ -34,10 +34,10 @@ func getEdition(id int) (Edition, int) {
 
 	// non-existant edition
 	if res.StatusCode != http.StatusOK {
-		return Edition{}, res.StatusCode
+		return edition{}, res.StatusCode
 	}
 
-	var ed Edition
+	var ed edition
 	dec := json.NewDecoder(res.Body)
 	dec.DisallowUnknownFields()
 	if err := dec.Decode(&ed); err != nil {
@@ -47,12 +47,12 @@ func getEdition(id int) (Edition, int) {
 	return ed, http.StatusOK
 }
 
-func getEditions() []Edition {
+func getEditions() []edition {
 	// we might overshoot, so we might have to truncate our edition slice later
 	lastId := lastEditionId()
 	nEds := lastId - firstEditionId + 1
 
-	editions := make([]Edition, nEds)
+	editions := make([]edition, nEds)
 	statuses := make([]int, nEds)
 	var wg sync.WaitGroup
 	for i := 0; i < nEds; i++ {
@@ -86,7 +86,7 @@ func getEditions() []Edition {
 	return editions
 }
 
-func exportEditions(eds []Edition) []types.Competition {
+func exportEditions(eds []edition) []types.Competition {
 	comps := make([]types.Competition, len(eds))
 
 	for i, ed := range eds {
