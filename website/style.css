@@ -1,0 +1,101 @@
+/* import fonts etc */
+@import url("https://fonts.googleapis.com/css?family=Inter");
+
+/* define colors! */
+:root {
+	--colorhunt-1: #FFF9EF;
+	--colorhunt-3: #BCCEF8;
+	--colorhunt-4: #3F5ADF;
+
+	--score-0-color: #FF8080;
+	--score-some-color: #FFBA92;
+	--score-100-color: #C6F1D6;
+	--null-link-color: #D9D9D9;
+}
+
+/* remove all spacing between cells */
+table { border-collapse: collapse; }
+
+/* apply table colors! */
+table { background-color: var(--colorhunt-1); }
+th { background-color: var(--colorhunt-3); }
+td.null-link { background-color: var(--null-link-color); }
+td.score-0 { background-color: var(--score-0-color); }
+td.score-100 { background-color: var(--score-100-color); }
+td.score-some {
+	background: linear-gradient(to right, var(--score-some-color) var(--score), transparent 0%);
+}
+
+/* borders */
+th { border-right: 1px solid var(--colorhunt-4); }
+tr {
+	border-left: 1px solid var(--colorhunt-4);
+	border-right: 1px solid var(--colorhunt-4);
+}
+table {
+	border-top: 1px solid var(--colorhunt-4);
+	border-bottom: 1px solid var(--colorhunt-4);
+}
+
+/* remove <a> decorations */
+a {
+	text-decoration: inherit;
+	color: inherit;
+}
+
+/* apply fonts */
+body, input { font-family: "inter"; }
+
+/* some padding for the table headers */
+th { padding: 5px 10px 5px 10px; }
+/* and some padding for the table cells */
+td { padding-left: 10px; }
+
+/* apply a width for table cells so they're not too squished nor too big, and also all the same */
+td { width: 120px; }
+
+/* shape the whole form container */
+form {
+	display: flex;
+	width: fit-content;
+	height: 40px;
+
+	/* get some space between the form and the table */
+	margin-bottom: 16px;
+}
+
+/* shape the submit button, remove default styles, and round the right corners */
+button {
+	border: 0;
+	border-radius: 0 15px 15px 0;
+	background-color: var(--colorhunt-4);
+	width: 40;
+}
+
+/* shape the text box, remove default styles, and make it look good */
+input {
+	border: 1px solid var(--colorhunt-4);
+	border-radius: 15px 0 0 15px;
+	background-color: var(--colorhunt-3);
+	width: 135;
+	padding-left: 10px;
+	font-size: 15px;
+}
+
+/* fix the fact that when you click the browser autocomplete it changes the box background color */
+input:-webkit-autofill {
+	-webkit-box-shadow: 0 0 0 30px var(--colorhunt-3) inset !important;
+}
+
+/* remove the outline that appears when you select the form input box */
+input:focus { outline: none; }
+
+/* for some reason the cursor wasn't as it should've been */
+button { cursor: pointer; }
+
+/* if there's multiple tables (ois) space them apart */
+table + table { margin-top: 30px; }
+
+a {
+	display: block;
+}
