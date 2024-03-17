@@ -1,5 +1,7 @@
 services:
   web:
     build: .
+    volumes:
+      - ./website:/var/www/
     ports:
       - "8080:8080"

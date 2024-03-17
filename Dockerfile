@@ -8,6 +8,4 @@ RUN go mod download && go mod verify
 COPY ./src ./src
 RUN go build -v -o /usr/local/bin/app ./src
 
-COPY ./website /var/www/
-
 CMD ["app"]
