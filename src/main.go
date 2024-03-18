@@ -54,11 +54,11 @@ func main() {
 		}
 
 		p := profiles.Get(username)
-		scores := profiles.ExportScores(p)
 		if p.Success == 1 {
+			scores := profiles.ExportScores(p)
 			c.JSON(http.StatusOK, scores)
 		} else {
-			c.String(http.StatusInternalServerError, *p.Error)
+			c.String(http.StatusBadRequest, *p.Error)
 		}
 	})
 
