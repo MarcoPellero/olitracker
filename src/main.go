@@ -21,9 +21,11 @@ func NewCompHandler(router *gin.Engine, fn func() types.Competition) func(*gin.C
 
 	go func() {
 		for {
-			lock.Lock()
 			// if this crashes the whole app crashes! TODO: fix?? :)
-			data = fn()
+			local_data := fn()
+
+			lock.Lock()
+			data = local_data
 			lock.Unlock()
 
 			time.Sleep(updateInterval)
