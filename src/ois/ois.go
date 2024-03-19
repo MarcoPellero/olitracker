@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"sync"
@@ -47,11 +48,16 @@ func getEdition(id int) (edition, int) {
 	return ed, http.StatusOK
 }
 
-func getEditions() []edition {
-	// we might overshoot, so we might have to truncate our edition slice later
-	lastId := lastEditionId()
-	nEds := lastId - firstEditionId + 1
+func rawGetEditionsSequential(nEds int) ([]edition, []int) {
+	eds := make([]edition, nEds)
+	statuses := make([]int, len(eds))
+	for i := 0; i < len(eds); i++ {
+		eds[i], statuses[i] = getEdition(firstEditionId + i)
+	}
+	return eds, statuses
+}
 
+func rawGetEditionsParallel(nEds int) ([]edition, []int) {
 	editions := make([]edition, nEds)
 	statuses := make([]int, nEds)
 	var wg sync.WaitGroup
@@ -63,6 +69,22 @@ func getEditions() []edition {
 		}(i)
 	}
 	wg.Wait()
+
+	return editions, statuses
+}
+
+func getEditions() []edition {
+	// we might overshoot, so we might have to truncate our edition slice later
+	lastId := lastEditionId()
+	nEds := lastId - firstEditionId + 1
+
+	var editions []edition
+	var statuses []int
+	if _, present := os.LookupEnv("OIS_SEQUENTIAL"); present {
+		editions, statuses = rawGetEditionsSequential(nEds)
+	} else {
+		editions, statuses = rawGetEditionsParallel(nEds)
+	}
 
 	// truncate editions slice if we overshot
 	if statuses[nEds-1] == http.StatusNotFound {
