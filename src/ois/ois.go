@@ -26,7 +26,33 @@ func lastEditionId() int {
 	return time.Now().Year() - firstYear + firstEditionId + 1
 }
 
-func getEdition(id int) (edition, int) {
+func getFinalRound(id int) (round, int) {
+	url := fmt.Sprintf("https://raw.githubusercontent.com/olinfo/squadre/master/json/edition.%d.round.final.json", id)
+	res, err := http.Get(url)
+	if err != nil {
+		panic(err)
+	}
+
+	// non-existant edition
+	if res.StatusCode != http.StatusOK {
+		return round{}, res.StatusCode
+	}
+
+	var round round
+	dec := json.NewDecoder(res.Body)
+
+	// singular rounds have more fields than a single round would in an edition fetch (edition.x.json vs edition.x.roud.y.json)
+	// it still has the data we need and i don't wanna type this data out again, so fuck it :)
+	// dec.DisallowUnknownFields()
+
+	if err := dec.Decode(&round); err != nil {
+		panic(err)
+	}
+
+	return round, http.StatusOK
+}
+
+func getMainEditionData(id int) (edition, int) {
 	url := fmt.Sprintf("https://raw.githubusercontent.com/olinfo/squadre/master/json/edition.%d.json", id)
 	res, err := http.Get(url)
 	if err != nil {
@@ -45,6 +71,36 @@ func getEdition(id int) (edition, int) {
 		panic(err)
 	}
 
+	return ed, http.StatusOK
+}
+
+func getEdition(id int) (edition, int) {
+	var wg sync.WaitGroup
+	var ed edition
+	var edStatus int
+	var round round
+	var roundStatus int
+
+	wg.Add(2)
+	go func() {
+		ed, edStatus = getMainEditionData(id)
+		wg.Done()
+	}()
+	go func() {
+		round, roundStatus = getFinalRound(id)
+		wg.Done()
+	}()
+
+	wg.Wait()
+
+	if edStatus != http.StatusOK {
+		return edition{}, edStatus
+	}
+	if roundStatus != http.StatusOK {
+		return edition{}, roundStatus
+	}
+
+	ed.Rounds = append(ed.Rounds, round)
 	return ed, http.StatusOK
 }
 
