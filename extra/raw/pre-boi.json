@@ -1,0 +1,31 @@
+{
+    "competition": "pre-BOI",
+    "details": [
+        {
+            "edition": "2022",
+            "rounds": [
+                {
+                    "round_name": "unique",
+                    "tasks": [
+                        {
+                            "name": "pre_boi_versi",
+                            "title": "Formiche, che soggetto!"
+                        },
+                        {
+                            "name": "pre_boi_sbarramento",
+                            "title": "Fuga da Vara\u017edin"
+                        },
+                        {
+                            "name": "pre_boi_git",
+                            "title": "Indecisioni su array"
+                        },
+                        {
+                            "name": "pre_boi_cerchi",
+                            "title": "Chi cerchia trova"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

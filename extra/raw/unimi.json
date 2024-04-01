@@ -1,0 +1,47 @@
+{
+    "competition": "UNIMIOPC (unimi)",
+    "details": [
+        {
+            "edition": "2019",
+            "rounds": [
+                {
+                    "round_name": "unique",
+                    "tasks": [
+                        {
+                            "name": "unimi_tax",
+                            "title": "Tax avoidance"
+                        },
+                        {
+                            "name": "unimi_sushi",
+                            "title": "Sushi bar"
+                        },
+                        {
+                            "name": "unimi_star",
+                            "title": "Stars"
+                        },
+                        {
+                            "name": "unimi_race",
+                            "title": "Race"
+                        },
+                        {
+                            "name": "unimi_quest",
+                            "title": "Quest for the ultimate item"
+                        },
+                        {
+                            "name": "unimi_glitch",
+                            "title": "Glitch"
+                        },
+                        {
+                            "name": "unimi_box",
+                            "title": "Making boxes"
+                        },
+                        {
+                            "name": "unimi_balance",
+                            "title": "Balanced"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

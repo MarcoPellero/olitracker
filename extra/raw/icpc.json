@@ -1,0 +1,55 @@
+{
+    "competition": "ICPC",
+    "details": [
+        {
+            "edition": "2014",
+            "rounds": [
+                {
+                    "round_name": "unique",
+                    "tasks": [
+                        {
+                            "name": "viaggio",
+                            "title": "Viaggio"
+                        },
+                        {
+                            "name": "suffissi",
+                            "title": "Suffissi"
+                        },
+                        {
+                            "name": "albero",
+                            "title": "Capitale di Alberolandia"
+                        },
+                        {
+                            "name": "mattoni",
+                            "title": "Pile di mattoni"
+                        },
+                        {
+                            "name": "quadrati",
+                            "title": "Quadrati perfetti"
+                        },
+                        {
+                            "name": "equazione",
+                            "title": "Equazione non quadratica"
+                        },
+                        {
+                            "name": "prefisso",
+                            "title": "Prefisso telefonico"
+                        },
+                        {
+                            "name": "helloworld",
+                            "title": "Hello World!"
+                        },
+                        {
+                            "name": "matrice",
+                            "title": "Matrice prima"
+                        },
+                        {
+                            "name": "lotteria",
+                            "title": "Edoardo e la lotteria"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

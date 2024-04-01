@@ -8,4 +8,6 @@ RUN go mod download && go mod verify
 COPY ./src ./src
 RUN go build -v -o /usr/local/bin/app ./src
 
+COPY ./extra ./extra
+
 CMD ["app"]

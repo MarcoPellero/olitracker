@@ -1,0 +1,49 @@
+{
+    "competition": "Selezione Matematici (MAT)",
+    "details": [
+        {
+            "edition": "2015",
+            "rounds": [
+                {
+                    "round_name": "unique",
+                    "tasks": [
+                        {
+                            "name": "mat_conio",
+                            "title": "Monete complicate"
+                        },
+                        {
+                            "name": "mat_boa",
+                            "title": "Giro di boa"
+                        },
+                        {
+                            "name": "mat_menu",
+                            "title": "Men\u00f9 giapponese"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "edition": "2018",
+            "rounds": [
+                {
+                    "round_name": "unique",
+                    "tasks": [
+                        {
+                            "name": "mat_pizzeria",
+                            "title": "Battaglia in pizzeria"
+                        },
+                        {
+                            "name": "mat_convegno",
+                            "title": "Convegno aziendale"
+                        },
+                        {
+                            "name": "mat_comb",
+                            "title": "Combinazione"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
