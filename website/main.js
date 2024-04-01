@@ -23,6 +23,12 @@ async function loadScores() {
 
 	const comp_prefix = competitions[select.selectedIndex].name.toLowerCase() + "_";
 
+	// flush previous scores
+	for (const elem of document.querySelectorAll("td")) {
+		elem.classList.remove("score-0", "score-100", "score-some");
+		elem.style = "";
+	}
+
 	for (const [task, score] of Object.entries(scores)) {
 		const possible_names = [task, `${comp_prefix}_${task}`, task.split(comp_prefix)[1]];
 		if (possible_names[2] === undefined) {
