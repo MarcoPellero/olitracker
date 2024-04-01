@@ -1,0 +1,149 @@
+{
+    "competition": "ABC",
+    "details": [
+        {
+            "edition": "2019",
+            "rounds": [
+                {
+                    "round_name": "unique",
+                    "tasks": [
+                        {
+                            "name": "abc_ultimacena",
+                            "title": "Cenacolo"
+                        },
+                        {
+                            "name": "abc_quadri",
+                            "title": "Lotteria di quadri"
+                        },
+                        {
+                            "name": "abc_progetti",
+                            "title": "Innumerevoli progetti"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "edition": "2018",
+            "rounds": [
+                {
+                    "round_name": "unique",
+                    "tasks": [                   
+                        {
+                            "name": "abc_rsa",
+                            "title": "Crittografia RSA"
+                        },
+                        {
+                            "name": "abc_mining",
+                            "title": "Criptovalute"
+                        },
+                        {
+                            "name": "abc_latenza2",
+                            "title": "Massima latenza II"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "edition": "2017",
+            "rounds": [
+                {
+                    "round_name": "unique",
+                    "tasks": [              
+                        {
+                            "name": "abc_studioamico",
+                            "title": "Studio amico"
+                        },
+                        {
+                            "name": "abc_paper",
+                            "title": "Citazioni nei paper"
+                        },
+                        {
+                            "name": "abc_checksum",
+                            "title": "Pacchetti corrotti"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "edition": "2016",
+            "rounds": [
+                {
+                    "round_name": "unique",
+                    "tasks": [
+                        {
+                            "name": "abc_verifiche",
+                            "title": "Verifiche"
+                        },
+                        {
+                            "name": "abc_esame",
+                            "title": "Esame di maturit\u00e0"
+                        },
+                        {
+                            "name": "abc_edifici",
+                            "title": "Edifici universitari"
+                        },
+                        {
+                            "name": "abc_altavelocita",
+                            "title": "Ferrovia ad alta velocit\u00e0"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "edition": "2015",
+            "rounds": [
+                {
+                    "round_name": "unique",
+                    "tasks": [
+                        {
+                            "name": "abc_latenza",
+                            "title": "Massima latenza"
+                        },
+                        {
+                            "name": "abc_interrogazioni",
+                            "title": "Interrogazioni ordinate"
+                        },
+                        {
+                            "name": "abc_triangoli",
+                            "title": "Numeri e triangoli"
+                        },
+                        {
+                            "name": "abc_qquadrati",
+                            "title": "Teorema dei quattro quadrati"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "edition": "2014",
+            "rounds": [
+                {
+                    "round_name": "unique",
+                    "tasks": [
+                        {
+                            "name": "abc_bug",
+                            "title": "Bug"
+                        },
+                        {
+                            "name": "abc_messaggi",
+                            "title": "Messaggi"
+                        },
+                        {
+                            "name": "abc_semina",
+                            "title": "Semina"
+                        },
+                        {
+                            "name": "abc_previsioni",
+                            "title": "Previsioni meteorologiche"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

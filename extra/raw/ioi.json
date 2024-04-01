@@ -1,0 +1,189 @@
+{
+    "competition": "IOI",
+    "details": [
+        {
+            "edition": "1994",
+            "rounds": [
+                {
+                    "round_name": "unique",
+                    "tasks": [
+                        {
+                            "name": "triangolo",
+                            "title": "Il triangolo"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "edition": "2006",
+            "rounds": [
+                {
+                    "round_name": "unique",
+                    "tasks": [
+                        {
+                            "name": "writing",
+                            "title": "Deciphering the Mayan writing"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "edition": "2007",
+            "rounds": [
+                {
+                    "round_name": "unique",
+                    "tasks": [
+                        {
+                            "name": "training",
+                            "title": "Training"
+                        },
+                        {
+                            "name": "sails",
+                            "title": "Sails"
+                        },                      
+                        {
+                            "name": "pairs",
+                            "title": "Pairs"
+                        },
+                        {
+                            "name": "flood",
+                            "title": "Flood"
+                        },
+                        {
+                            "name": "aliens",
+                            "title": "Aliens"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "edition": "2008",
+            "rounds": [
+                {
+                    "round_name": "unique",
+                    "tasks": [
+                        {
+                            "name": "teleporters",
+                            "title": "Teleporters"
+                        },
+                        {
+                            "name": "pyramidbase",
+                            "title": "Pyramid Base"
+                        },
+                        {
+                            "name": "printer",
+                            "title": "Type Printer"
+                        },
+                        {
+                            "name": "lgarden",
+                            "title": "Linear Garden"
+                        },
+                        {
+                            "name": "islands",
+                            "title": "Islands"
+                        },
+                        {
+                            "name": "fish",
+                            "title": "Fish"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "edition": "2009",
+            "rounds": [
+                {
+                    "round_name": "unique",
+                    "tasks": [
+                        {
+                            "name": "salesman",
+                            "title": "Salesman"
+                        },
+                        {
+                            "name": "raisins",
+                            "title": "Raisins"
+                        },
+                        {
+                            "name": "poi",
+                            "title": "POI"
+                        },
+                        {
+                            "name": "mecho",
+                            "title": "Mecho"
+                        },
+                        {
+                            "name": "hiring",
+                            "title": "Hiring"
+                        },                      
+                        {
+                            "name": "garage",
+                            "title": "Garage"
+                        },
+                        {
+                            "name": "archery",
+                            "title": "Archery"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "edition": "2010",
+            "rounds": [
+                {
+                    "round_name": "unique",
+                    "tasks": [
+                        {
+                            "name": "traffic",
+                            "title": "Traffic Congestion"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "edition": "2011",
+            "rounds": [
+                {
+                    "round_name": "unique",
+                    "tasks": [
+                        {
+                            "name": "rice",
+                            "title": "Ricehub"
+                        },
+                        {
+                            "name": "garden",
+                            "title": "Tropical Garden"
+                        },
+                        {
+                            "name": "crocodile",
+                            "title": "Crocodile"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "edition": "2012",
+            "rounds": [
+                {
+                    "round_name": "unique",
+                    "tasks": [
+                        {
+                            "name": "tourist",
+                            "title": "Touristic plan"
+                        },
+                        {
+                            "name": "pizza",
+                            "title": "Olympic pizza"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

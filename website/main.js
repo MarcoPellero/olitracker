@@ -91,6 +91,7 @@ function loadTable() {
 }
 
 async function main() {
+	/*
 	const [oii, ois] = await Promise.all(
 		["/api/oii", "/api/ois"]
 			.map(url => fetch(url).then(res => res.json()))
@@ -99,6 +100,19 @@ async function main() {
 	console.log("OIS:", ois);
 
 	competitions = [oii, ois];
+	*/
+
+	const compNames = await fetch("/api/competitions")
+		.then(res => res.json());
+	console.log("Competitions:", compNames);
+	
+	competitions = await Promise.all(
+		compNames.map(name => fetch(`/api/${name}`)
+			.then(res => res.json())
+	));
+	for (const comp of competitions)
+		console.log(comp);
+
 	for (const comp of competitions) {
 		// sort by most recent
 		comp.editions.sort((a, b) => b.year - a.year);

@@ -1,0 +1,27 @@
+{
+    "competition": "Roiti",
+    "details": [
+        {
+            "edition": "2017",
+            "rounds": [
+                {
+                    "round_name": "unique",
+                    "tasks": [
+                        {
+                            "name": "roiti_password",
+                            "title": "L33t H4xX0R"
+                        },
+                        {
+                            "name": "roiti_porte",
+                            "title": "Ma chi \u00e8 quel mona?"
+                        },
+                        {
+                            "name": "roiti_plenaria",
+                            "title": "Seduta plenaria"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

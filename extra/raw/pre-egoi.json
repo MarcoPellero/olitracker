@@ -1,0 +1,35 @@
+{
+    "competition": "pre-EGOI",
+    "details": [
+        {
+            "edition": "2022",
+            "rounds": [
+                {
+                    "round_name": "unique",
+                    "tasks": [
+                        {
+                            "name": "pre-egoi-parkour",
+                            "title": "Sui tetti di Pisa"
+                        },
+                        {
+                            "name": "pre-egoi-torta",
+                            "title": "Torta di Compleanno"
+                        },
+                        {
+                            "name": "pre-egoi-festaestiva",
+                            "title": "Festa Estiva"
+                        },
+                        {
+                            "name": "pre-egoi-carte",
+                            "title": "Bustine di carte"
+                        },
+                        {
+                            "name": "pre-egoi-gelato",
+                            "title": "Gelati costosi"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

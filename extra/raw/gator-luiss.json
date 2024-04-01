@@ -1,0 +1,109 @@
+{
+    "competition": "Gator - Luiss",
+    "details": [
+        {
+            "edition": "2018",
+            "rounds": [
+                {
+                    "round_name": "unique",
+                    "tasks": [
+                        {
+                            "name": "luiss_piano",
+                            "title": "Piano di studi"
+                        },
+                        {
+                            "name": "luiss_laurea",
+                            "title": "Festa di laurea"
+                        },
+                        {
+                            "name": "luiss_azioni",
+                            "title": "Fluttuazioni finanziare"
+                        },
+                        {
+                            "name": "luiss_suppli",
+                            "title": "Minisuppl\u00ec"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "edition": "2016",
+            "rounds": [
+                {
+                    "round_name": "unique",
+                    "tasks": [
+                        {
+                            "name": "gator_tesla",
+                            "title": "Tesla Motors"
+                        },
+                        {
+                            "name": "gator_pcollatz",
+                            "title": "Sequenza di Pollatz"
+                        },
+                        {
+                            "name": "gator_somme",
+                            "title": "Somme costose"
+                        },
+                        {
+                            "name": "gator_monete",
+                            "title": "Monete a posto"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "edition": "2015",
+            "rounds": [
+                {
+                    "round_name": "unique",
+                    "tasks": [
+                        {
+                            "name": "tedoforo",
+                            "title": "Tedoforo"
+                        },
+                        {
+                            "name": "canoa",
+                            "title": "Canottaggio"
+                        },
+                        {
+                            "name": "cercalesomme",
+                            "title": "Cerca le somme"
+                        },
+                        {
+                            "name": "gator_classifica",
+                            "title": "Classifica"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "edition": "2014",
+            "rounds": [
+                {
+                    "round_name": "unique",
+                    "tasks": [
+                        {
+                            "name": "cannoniere",
+                            "title": "Cannoniere"
+                        },
+                        {
+                            "name": "fulcrodelgioco",
+                            "title": "Fulcro del gioco"
+                        },
+                        {
+                            "name": "fuorigioco",
+                            "title": "Fuorigioco"
+                        },
+                        {
+                            "name": "sorteggio",
+                            "title": "Pilota il sorteggio"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

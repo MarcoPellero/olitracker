@@ -6,13 +6,19 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"olitracker.it/src/extra"
 	"olitracker.it/src/oii"
 	"olitracker.it/src/ois"
 	"olitracker.it/src/profiles"
 	"olitracker.it/src/types"
 )
 
-func NewCompHandler(router *gin.Engine, fn func() types.Competition) func(*gin.Context) {
+type CompetitionHandler struct {
+	Name   string
+	Getter func() types.Competition
+}
+
+func NewCompHandler(fn func() types.Competition) func(*gin.Context) {
 	// returns a handler that accesses periodically refreshed data
 
 	updateInterval := 15 * time.Minute
@@ -45,8 +51,30 @@ func main() {
 	router.StaticFile("/", "/var/www/index.html")
 	router.StaticFS("/assets/", http.Dir("/var/www/"))
 
-	router.GET("/api/oii", NewCompHandler(router, oii.Get))
-	router.GET("/api/ois", NewCompHandler(router, ois.Get))
+	handlers := make([]CompetitionHandler, 0)
+	handlers = append(handlers, CompetitionHandler{"oii", oii.Get})
+	handlers = append(handlers, CompetitionHandler{"ois", ois.Get})
+
+	extraComps := extra.GetList()
+	for _, comp := range extraComps {
+		compName := comp // need to copy comp, or the value of the last iteration will be used
+		handlers = append(handlers, CompetitionHandler{compName, func() types.Competition {
+			return extra.Get(compName)
+		}})
+	}
+
+	for _, handler := range handlers {
+		router.GET("/api/"+handler.Name, NewCompHandler(handler.Getter))
+	}
+
+	router.GET("/api/competitions", func(c *gin.Context) {
+		names := make([]string, len(handlers))
+		for i, handler := range handlers {
+			names[i] = handler.Name
+		}
+
+		c.JSON(http.StatusOK, names)
+	})
 
 	router.GET("/api/scores", func(c *gin.Context) {
 		username := c.Query("username")
