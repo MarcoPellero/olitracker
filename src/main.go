@@ -13,36 +13,23 @@ import (
 	"olitracker.it/src/types"
 )
 
-type CompetitionHandler struct {
+type CompHandlerCtx struct {
 	Name   string
+	data   types.Competition
+	lock   *sync.RWMutex
 	Getter func() types.Competition
 }
 
-func NewCompHandler(fn func() types.Competition) func(*gin.Context) {
-	// returns a handler that accesses periodically refreshed data
+func (ctx *CompHandlerCtx) Update() {
+	ctx.lock.Lock()
+	defer ctx.lock.Unlock()
+	ctx.data = ctx.Getter()
+}
 
-	updateInterval := 15 * time.Minute
-	data := types.Competition{}
-	lock := &sync.RWMutex{}
-
-	go func() {
-		for {
-			// if this crashes the whole app crashes! TODO: fix?? :)
-			local_data := fn()
-
-			lock.Lock()
-			data = local_data
-			lock.Unlock()
-
-			time.Sleep(updateInterval)
-		}
-	}()
-
-	return func(c *gin.Context) {
-		lock.RLock()
-		defer lock.RUnlock()
-		c.JSON(http.StatusOK, data)
-	}
+func (ctx *CompHandlerCtx) Get() types.Competition {
+	ctx.lock.RLock()
+	defer ctx.lock.RUnlock()
+	return ctx.data
 }
 
 func main() {
@@ -51,29 +38,65 @@ func main() {
 	router.StaticFile("/", "/var/www/index.html")
 	router.StaticFS("/assets/", http.Dir("/var/www/"))
 
-	handlers := make([]CompetitionHandler, 0)
-	handlers = append(handlers, CompetitionHandler{"oii", oii.Get})
-	handlers = append(handlers, CompetitionHandler{"ois", ois.Get})
+	// register all comp handlers
+	handlers := make([]CompHandlerCtx, 0)
+
+	handlers = append(handlers, CompHandlerCtx{Name: "oii", lock: &sync.RWMutex{}, Getter: oii.Get})
+	handlers = append(handlers, CompHandlerCtx{Name: "ois", lock: &sync.RWMutex{}, Getter: ois.Get})
 
 	extraComps := extra.GetList()
 	for _, comp := range extraComps {
-		compName := comp // need to copy comp, or the value of the last iteration will be used
-		handlers = append(handlers, CompetitionHandler{compName, func() types.Competition {
-			return extra.Get(compName)
+		nameCopy := comp // need to copy comp, or the value of the last iteration will be used
+		handlers = append(handlers, CompHandlerCtx{Name: comp, lock: &sync.RWMutex{}, Getter: func() types.Competition {
+			return extra.Get(nameCopy)
 		}})
 	}
 
-	for _, handler := range handlers {
-		router.GET("/api/"+handler.Name, NewCompHandler(handler.Getter))
+	// initial data fetch
+	var wg sync.WaitGroup
+	for i := range handlers {
+		wg.Add(1)
+		go func(i int) {
+			handlers[i].Update()
+			wg.Done()
+		}(i)
+	}
+	wg.Wait()
+
+	// register periodic handler updaters
+	for i := range handlers {
+		go func(i int) {
+			for {
+				time.Sleep(15 * time.Minute)
+				handlers[i].Update()
+			}
+		}(i)
 	}
 
-	router.GET("/api/competitions", func(c *gin.Context) {
+	// register handler routes
+	for _, handler := range handlers {
+		handler := handler
+		router.GET("/api/"+handler.Name, func(c *gin.Context) {
+			c.JSON(http.StatusOK, handler.Get())
+		})
+	}
+
+	router.GET("/api/list", func(c *gin.Context) {
 		names := make([]string, len(handlers))
 		for i, handler := range handlers {
 			names[i] = handler.Name
 		}
 
 		c.JSON(http.StatusOK, names)
+	})
+
+	router.GET("/api/all", func(c *gin.Context) {
+		resp := make([]types.Competition, len(handlers))
+		for i, handler := range handlers {
+			resp[i] = handler.Get()
+		}
+
+		c.JSON(http.StatusOK, resp)
 	})
 
 	router.GET("/api/scores", func(c *gin.Context) {

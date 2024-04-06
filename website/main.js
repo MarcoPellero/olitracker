@@ -97,25 +97,8 @@ function loadTable() {
 }
 
 async function main() {
-	/*
-	const [oii, ois] = await Promise.all(
-		["/api/oii", "/api/ois"]
-			.map(url => fetch(url).then(res => res.json()))
-	);
-	console.log("OII:", oii);
-	console.log("OIS:", ois);
+	competitions = await fetch("/api/all").then(res => res.json());
 
-	competitions = [oii, ois];
-	*/
-
-	const compNames = await fetch("/api/competitions")
-		.then(res => res.json());
-	console.log("Competitions:", compNames);
-	
-	competitions = await Promise.all(
-		compNames.map(name => fetch(`/api/${name}`)
-			.then(res => res.json())
-	));
 	for (const comp of competitions)
 		console.log(comp);
 
