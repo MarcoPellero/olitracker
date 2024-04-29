@@ -24,10 +24,10 @@ func GetList() []string {
 	return names
 }
 
-func Get(name string) types.Competition {
+func Get(name string) (types.Competition, error) {
 	f, err := os.Open(basePath + name + ".json")
 	if err != nil {
-		panic(err)
+		return types.Competition{}, err
 	}
 	defer f.Close()
 
@@ -36,8 +36,8 @@ func Get(name string) types.Competition {
 	dec := json.NewDecoder(f)
 	dec.DisallowUnknownFields()
 	if err := dec.Decode(&comp); err != nil {
-		panic(err)
+		return types.Competition{}, err
 	}
 
-	return comp
+	return comp, nil
 }

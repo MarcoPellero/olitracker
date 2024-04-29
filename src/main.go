@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"net/http"
 	"sync"
 	"time"
@@ -17,13 +18,18 @@ type CompHandlerCtx struct {
 	Name   string
 	data   types.Competition
 	lock   *sync.RWMutex
-	Getter func() types.Competition
+	Getter func() (types.Competition, error)
 }
 
 func (ctx *CompHandlerCtx) Update() {
 	ctx.lock.Lock()
 	defer ctx.lock.Unlock()
-	ctx.data = ctx.Getter()
+	data, err := ctx.Getter()
+	if err != nil {
+		log.Println(err)
+	} else {
+		ctx.data = data
+	}
 }
 
 func (ctx *CompHandlerCtx) Get() types.Competition {
@@ -47,7 +53,7 @@ func main() {
 	extraComps := extra.GetList()
 	for _, comp := range extraComps {
 		nameCopy := comp // need to copy comp, or the value of the last iteration will be used
-		handlers = append(handlers, CompHandlerCtx{Name: comp, lock: &sync.RWMutex{}, Getter: func() types.Competition {
+		handlers = append(handlers, CompHandlerCtx{Name: comp, lock: &sync.RWMutex{}, Getter: func() (types.Competition, error) {
 			return extra.Get(nameCopy)
 		}})
 	}
@@ -67,7 +73,8 @@ func main() {
 	for i := range handlers {
 		go func(i int) {
 			for {
-				time.Sleep(15 * time.Minute)
+				// time.Sleep(15 * time.Minute)
+				time.Sleep(10 * time.Second)
 				handlers[i].Update()
 			}
 		}(i)

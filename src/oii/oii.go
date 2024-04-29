@@ -7,10 +7,10 @@ import (
 	"olitracker.it/src/types"
 )
 
-func getEditions() []edition {
+func getEditions() ([]edition, error) {
 	res, err := http.Get("https://raw.githubusercontent.com/algorithm-ninja/oii-stats/master/data/contests.json")
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	defer res.Body.Close()
 
@@ -21,10 +21,10 @@ func getEditions() []edition {
 	dec := json.NewDecoder(res.Body)
 	dec.DisallowUnknownFields()
 	if err := dec.Decode(&dump); err != nil {
-		panic(err)
+		return nil, err
 	}
 
-	return dump.Editions
+	return dump.Editions, nil
 }
 
 func exportEditions(editions []edition) types.Competition {
@@ -56,6 +56,11 @@ func exportEditions(editions []edition) types.Competition {
 	return comp
 }
 
-func Get() types.Competition {
-	return exportEditions(getEditions())
+func Get() (types.Competition, error) {
+	editions, err := getEditions()
+	if err != nil {
+		return types.Competition{}, err
+	}
+
+	return exportEditions(editions), nil
 }

@@ -3,7 +3,6 @@ package ois
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -25,100 +24,100 @@ func lastEditionId() int {
 	return time.Now().Year() - firstYear + firstEditionId + 1
 }
 
-func getFinalRound(id int) (round, int) {
+func getFinalRound(id int) (round, int, error) {
 	url := fmt.Sprintf("https://raw.githubusercontent.com/olinfo/squadre/master/json/edition.%d.round.final.json", id)
 	res, err := http.Get(url)
 	if err != nil {
-		panic(err)
+		return round{}, 0, err
 	}
 
 	// non-existant edition
 	if res.StatusCode != http.StatusOK {
-		return round{}, res.StatusCode
+		return round{}, res.StatusCode, nil
 	}
 
-	var round round
+	var r round
 	dec := json.NewDecoder(res.Body)
 
 	// singular rounds have more fields than a single round would in an edition fetch (edition.x.json vs edition.x.roud.y.json)
 	// it still has the data we need and i don't wanna type this data out again, so fuck it :)
 	// dec.DisallowUnknownFields()
 
-	if err := dec.Decode(&round); err != nil {
-		panic(err)
+	if err := dec.Decode(&r); err != nil {
+		return round{}, 0, nil
 	}
 
-	return round, http.StatusOK
+	return r, http.StatusOK, nil
 }
 
-func getMainEditionData(id int) (edition, int) {
+func getMainEditionData(id int) (edition, int, error) {
 	url := fmt.Sprintf("https://raw.githubusercontent.com/olinfo/squadre/master/json/edition.%d.json", id)
 	res, err := http.Get(url)
 	if err != nil {
-		panic(err)
+		return edition{}, 0, err
 	}
 
 	// non-existant edition
 	if res.StatusCode != http.StatusOK {
-		return edition{}, res.StatusCode
+		return edition{}, res.StatusCode, nil
 	}
 
 	var ed edition
 	dec := json.NewDecoder(res.Body)
 	dec.DisallowUnknownFields()
 	if err := dec.Decode(&ed); err != nil {
-		panic(err)
+		return edition{}, 0, nil
 	}
 
-	return ed, http.StatusOK
+	return ed, http.StatusOK, nil
 }
 
-func getEdition(id int) (edition, int) {
-	var wg sync.WaitGroup
-	var ed edition
-	var edStatus int
-	var round round
-	var roundStatus int
-
-	wg.Add(2)
-	go func() {
-		ed, edStatus = getMainEditionData(id)
-		wg.Done()
-	}()
-	go func() {
-		round, roundStatus = getFinalRound(id)
-		wg.Done()
-	}()
-
-	wg.Wait()
-
+func getEdition(id int) (edition, int, error) {
+	// these can be done concurrently (i used to) but it makes for uglier code; they're single fast requests anyway
+	ed, edStatus, err := getMainEditionData(id)
+	if err != nil {
+		return edition{}, 0, err
+	}
 	if edStatus != http.StatusOK {
-		return edition{}, edStatus
+		return edition{}, edStatus, nil
+	}
+
+	round, roundStatus, err := getFinalRound(id)
+	if err != nil {
+		return edition{}, 0, err
 	}
 	if roundStatus != http.StatusOK {
-		return edition{}, roundStatus
+		return edition{}, roundStatus, nil
 	}
 
 	ed.Rounds = append(ed.Rounds, round)
-	return ed, http.StatusOK
+	return ed, http.StatusOK, nil
 }
 
-func getEditions() []edition {
+func getEditions() ([]edition, error) {
 	// we might overshoot, so we might have to truncate our edition slice later
 	lastId := lastEditionId()
 	nEds := lastId - firstEditionId + 1
 
 	editions := make([]edition, nEds)
 	statuses := make([]int, nEds)
+	errors := make([]error, nEds)
 	var wg sync.WaitGroup
 	for i := 0; i < nEds; i++ {
 		wg.Add(1)
 		go func(i int) {
-			editions[i], statuses[i] = getEdition(firstEditionId + i)
+			editions[i], statuses[i], errors[i] = getEdition(firstEditionId + i)
 			wg.Done()
 		}(i)
 	}
 	wg.Wait()
+
+	// bin all the data if there's even a single error
+	for i, err := range errors {
+		if err != nil {
+			return nil, fmt.Errorf("error fetching edition %d: %w", firstEditionId+i, err)
+		}
+	}
 
 	// truncate editions slice if we overshot
 	if statuses[nEds-1] == http.StatusNotFound {
@@ -135,11 +134,12 @@ func getEditions() []edition {
 
 	for i, status := range statuses {
 		if status != http.StatusOK {
-			log.Panicf("got non-OK http status when fetching edition %d: %d", firstEditionId+i, status)
+			// this should never happen
+			return nil, fmt.Errorf("got non-OK http status when fetching edition %d: %d", firstEditionId+i, status)
 		}
 	}
 
-	return editions
+	return editions, nil
 }
 
 func exportEditions(inEds []edition) types.Competition {
@@ -152,7 +152,7 @@ func exportEditions(inEds []edition) types.Competition {
 		// "2014/15" -> 2014
 		year, err := strconv.Atoi(strings.Split(inEd.YearStr, "/")[0])
 		if err != nil {
-			panic(err)
+			panic(err) // this is a pretty serious error; the data format must've changed. i'm ok with panicking here
 		}
 
 		outEd := &comp.Editions[i]
@@ -181,6 +181,11 @@ func exportEditions(inEds []edition) types.Competition {
 	return comp
 }
 
-func Get() types.Competition {
-	return exportEditions(getEditions())
+func Get() (types.Competition, error) {
+	editions, err := getEditions()
+	if err != nil {
+		return types.Competition{}, err
+	}
+
+	return exportEditions(editions), nil
 }
