@@ -79,8 +79,7 @@ func main() {
 	for i := range handlers {
 		go func(i int) {
 			for {
-				// time.Sleep(15 * time.Minute)
-				time.Sleep(10 * time.Second)
+				time.Sleep(15 * time.Minute)
 				handlers[i].Update()
 			}
 		}(i)
