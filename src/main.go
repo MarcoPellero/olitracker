@@ -21,15 +21,18 @@ type CompHandlerCtx struct {
 	Getter func() (types.Competition, error)
 }
 
-func (ctx *CompHandlerCtx) Update() {
+func (ctx *CompHandlerCtx) Update() error {
 	ctx.lock.Lock()
 	defer ctx.lock.Unlock()
+
 	data, err := ctx.Getter()
 	if err != nil {
 		log.Println(err)
-	} else {
-		ctx.data = data
+		return err
 	}
+
+	ctx.data = data
+	return nil
 }
 
 func (ctx *CompHandlerCtx) Get() types.Competition {
@@ -63,7 +66,10 @@ func main() {
 	for i := range handlers {
 		wg.Add(1)
 		go func(i int) {
-			handlers[i].Update()
+			err := handlers[i].Update()
+			if err != nil {
+				panic(err)
+			}
 			wg.Done()
 		}(i)
 	}
